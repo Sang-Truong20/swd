@@ -1,9 +1,5 @@
-import React from 'react'
-
 const MemberPage = () => {
-  return (
-    <div>MemberPage</div>
-  )
-}
+  return <div>MemberPage</div>;
+};
 
-export default MemberPage
+export default MemberPage;
