@@ -1,20 +1,24 @@
-import { lazy, Suspense } from 'react';
-import { createBrowserRouter } from 'react-router-dom';
-
-const LandingPage = lazy(() => import('../pages/LandingPage'));
-const LoginPage = lazy(() => import('../pages/auth/LoginPage'));
-const RegisterPage = lazy(() => import('../pages/auth/RegisterPage'));
-const MemberPage = lazy(() => import('../pages/member/MemberPage'));
-const AdminHome = lazy(() => import('../pages/admin/AdminHome'));
-
 import { Spin } from 'antd';
+import { lazy, Suspense } from 'react';
+import { createBrowserRouter, Outlet } from 'react-router-dom';
+import LandingLayout from '../components/layouts/LandingLayout';
+import { PATH_NAME } from '../constants';
+import AuthPage from '../pages/auth';
+import NotFound from '../pages/notfound';
 import AdminRoutes from './AdminRoutes';
+import GuestRoute from './GuestRoute';
 import MemberRoutes from './MemberRoutes';
+
+const LandingPage = lazy(() => import('../pages/landing'));
+const MemberPage = lazy(() => import('../pages/member'));
+const AdminHome = lazy(() => import('../pages/admin'));
+const Post = lazy(() => import('../pages/post'));
+const PostDetail = lazy(() => import('../pages/post/detail'));
 
 const withSuspense = (Component) => (
   <Suspense
     fallback={
-      <div>
+      <div className="flex items-center justify-center min-h-screen">
         <Spin size="large" />
       </div>
     }
@@ -25,22 +29,40 @@ const withSuspense = (Component) => (
 
 const router = createBrowserRouter([
   {
-    path: '/',
-    element: withSuspense(LandingPage),
+    element: (
+      <LandingLayout>
+        <Outlet />
+      </LandingLayout>
+    ),
+    children: [
+      {
+        path: PATH_NAME.HOME,
+        element: withSuspense(LandingPage),
+      },
+      {
+        path: PATH_NAME.POST,
+        element: withSuspense(Post),
+      },
+      {
+        path: PATH_NAME.POST_DETAIL,
+        element: withSuspense(PostDetail),
+      },
+    ],
   },
   {
-    path: '/login',
-    element: withSuspense(LoginPage),
-  },
-  {
-    path: '/register',
-    element: withSuspense(RegisterPage),
+    element: <GuestRoute />,
+    children: [
+      {
+        path: PATH_NAME.AUTH,
+        element: <AuthPage />,
+      },
+    ],
   },
   {
     element: <MemberRoutes />,
     children: [
       {
-        path: '/member',
+        path: PATH_NAME.MEMBER,
         element: withSuspense(MemberPage),
       },
     ],
@@ -49,10 +71,14 @@ const router = createBrowserRouter([
     element: <AdminRoutes />,
     children: [
       {
-        path: '/admin',
+        path: PATH_NAME.ADMIN,
         element: withSuspense(AdminHome),
       },
     ],
+  },
+  {
+    path: PATH_NAME.NOT_FOUND,
+    element: <NotFound />,
   },
 ]);
 
