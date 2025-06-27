@@ -8,4 +8,23 @@ const PATH_NAME = {
   ADMIN: '/admin',
 };
 
-export { PATH_NAME };
+const NAV_ELEMENTS = [
+  {
+    name: 'TRANG CHỦ',
+    path: '/',
+  },
+  {
+    name: 'BÀI VIẾT',
+    path: '#',
+  },
+  {
+    name: 'TRỢ LÝ ẢO',
+    path: '#',
+  },
+  {
+    name: 'VỀ CHÚNG TÔI',
+    path: '/contact',
+  },
+];
+
+export { PATH_NAME, NAV_ELEMENTS };

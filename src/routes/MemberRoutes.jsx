@@ -1,7 +1,7 @@
 import { Navigate, Outlet } from 'react-router-dom';
 
 const MemberRoutes = () => {
-  const isMember = false;
+  const isMember = true;
 
   return isMember ? <Outlet /> : <Navigate to="/login" replace />;
 };

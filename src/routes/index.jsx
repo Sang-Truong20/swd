@@ -11,6 +11,9 @@ import MemberRoutes from './MemberRoutes';
 
 const LandingPage = lazy(() => import('../pages/landing'));
 const MemberPage = lazy(() => import('../pages/member'));
+const MemberInfo = lazy(() => import('../pages/member/MemberInfo'));
+const ChangePassword = lazy(() => import('../pages/member/ChangePassword'));
+const PackageManager = lazy(() => import('../pages/member/PackageManager'));
 const AdminHome = lazy(() => import('../pages/admin'));
 const Post = lazy(() => import('../pages/post'));
 const PostDetail = lazy(() => import('../pages/post/detail'));
@@ -47,6 +50,23 @@ const router = createBrowserRouter([
         path: PATH_NAME.POST_DETAIL,
         element: withSuspense(PostDetail),
       },
+      {
+        element: <MemberRoutes />,
+        children: [
+          {
+            path: PATH_NAME.MEMBER,
+            element: withSuspense(MemberPage),
+            children: [
+              { path: 'info', element: withSuspense(MemberInfo) },
+              {
+                path: 'change-password',
+                element: withSuspense(ChangePassword),
+              },
+              { path: 'package', element: withSuspense(PackageManager) },
+            ],
+          },
+        ],
+      },
     ],
   },
   {
@@ -58,15 +78,7 @@ const router = createBrowserRouter([
       },
     ],
   },
-  {
-    element: <MemberRoutes />,
-    children: [
-      {
-        path: PATH_NAME.MEMBER,
-        element: withSuspense(MemberPage),
-      },
-    ],
-  },
+
   {
     element: <AdminRoutes />,
     children: [
@@ -76,6 +88,7 @@ const router = createBrowserRouter([
       },
     ],
   },
+
   {
     path: PATH_NAME.NOT_FOUND,
     element: <NotFound />,

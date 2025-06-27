@@ -1,9 +1,9 @@
 import { Navigate, Outlet } from 'react-router-dom';
 
 const AdminRoutes = () => {
-  const isAdmin = false;
+  const isAdmin = true;
 
-  return isAdmin ? <Outlet /> : <Navigate to='/login' replace />;
+  return isAdmin ? <Outlet /> : <Navigate to="/login" replace />;
 };
 
 export default AdminRoutes;

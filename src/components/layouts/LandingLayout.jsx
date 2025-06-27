@@ -1,9 +1,12 @@
+import Footer from './Footer';
+import Navbar from './Navbar';
+
 const LandingLayout = ({ children }) => {
   return (
     <>
-      <div>header</div>
-      <main>{children}</main>
-      <div>footer</div>
+      <Navbar />
+      <main className="min-h-screen">{children}</main>
+      <Footer />
     </>
   );
 };
