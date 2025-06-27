@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider } from 'react-router-dom';
+import { useFirebaseMessaging } from './hooks/useFirebaseMessaging';
 import router from './routes';
 
 const queryClient = new QueryClient();
@@ -15,6 +16,8 @@ function App() {
         console.error('Service Worker registration failed:', err);
       });
   }
+
+  useFirebaseMessaging();
 
   return (
     <QueryClientProvider client={queryClient}>
