@@ -1,4 +1,8 @@
+import { useFirebaseMessaging } from '../../hooks/useFirebaseMessaging';
+
 const LandingLayout = ({ children }) => {
+  useFirebaseMessaging();
+
   return (
     <>
       <div>header</div>
