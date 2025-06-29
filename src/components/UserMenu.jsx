@@ -195,11 +195,6 @@ const UserMenu = ({ user, onLogout, mobile = false }) => {
           )}
         </div>
 
-        <div className="hidden sm:block text-left">
-          <p className="text-sm font-semibold text-gray-900">{user.name}</p>
-          <p className="text-xs text-gray-500">{user.email}</p>
-        </div>
-
         <svg
           className={`w-4 h-4 text-gray-500 transform transition-transform duration-200 ${
             isDropdownOpen ? 'rotate-180' : ''

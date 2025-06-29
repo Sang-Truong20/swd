@@ -6,6 +6,12 @@ const PATH_NAME = {
   NOT_FOUND: '*',
   MEMBER: '/member',
   ADMIN: '/admin',
+  CHAT_BOT: '/member/chatbot',
+  CONTACT: '/contact',
+  ABOUT: '/about',
+  PACKAGE_MAMANGEMENT: '/member/package',
+  CHANGE_PASSWORD: '/member/change-password',
+  MEMBER_INFO: '/member/info',
 };
 
 const NAV_ELEMENTS = [
@@ -19,7 +25,7 @@ const NAV_ELEMENTS = [
   },
   {
     name: 'TRỢ LÝ ẢO',
-    path: '#',
+    path: PATH_NAME.CHAT_BOT,
   },
   {
     name: 'VỀ CHÚNG TÔI',
