@@ -18,7 +18,7 @@ const MemberPage = () => {
   }, [location, navigate]);
 
   return (
-    <div className="max-w-2xl mx-auto mt-8 p-4 bg-white rounded-xl shadow-lg">
+    <div className="max-w-2xl mx-auto my-10 p-4 bg-white rounded-xl shadow-lg">
       <div className="flex border-b mb-6 gap-2">
         {tabs.map((tab) => (
           <NavLink

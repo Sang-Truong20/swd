@@ -1,55 +1,103 @@
+import { Form, Input, Button, Card, message } from 'antd';
 import { useState } from 'react';
 
 const ChangePassword = () => {
-  const [oldPassword, setOldPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
+
+  const onFinish = (values) => {
+    console.log('values', values);
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      message.success('Đổi mật khẩu thành công!');
+      form.resetFields();
+    }, 1200);
+  };
 
   return (
-    <form className="bg-white p-6 rounded-lg shadow-md max-w-lg mx-auto space-y-6">
-      <h2 className="text-xl font-bold text-blue-700 mb-4 border-b pb-2">
-        Đổi mật khẩu
-      </h2>
-      <div>
-        <label className="block text-gray-600 font-medium mb-1">
-          Mật khẩu cũ
-        </label>
-        <input
-          type="password"
-          className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-blue-400"
-          value={oldPassword}
-          onChange={(e) => setOldPassword(e.target.value)}
-        />
-      </div>
-      <div>
-        <label className="block text-gray-600 font-medium mb-1">
-          Mật khẩu mới
-        </label>
-        <input
-          type="password"
-          className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-blue-400"
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-        />
-      </div>
-      <div>
-        <label className="block text-gray-600 font-medium mb-1">
-          Nhập lại mật khẩu mới
-        </label>
-        <input
-          type="password"
-          className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-blue-400"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-        />
-      </div>
-      <button
-        type="submit"
-        className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded font-semibold shadow transition"
+    <Card
+      title={
+        <span className="text-xl font-bold text-blue-700">Đổi mật khẩu</span>
+      }
+      bordered={false}
+      className="shadow-xl rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50"
+      style={{ maxWidth: 480, margin: '0 auto' }}
+    >
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={onFinish}
+        size="large"
+        className="pt-2"
       >
-        Đổi mật khẩu
-      </button>
-    </form>
+        <Form.Item
+          label="Mật khẩu cũ"
+          name="oldPassword"
+          rules={[{ required: true, message: 'Vui lòng nhập mật khẩu cũ!' }]}
+        >
+          <Input.Password
+            placeholder="Nhập mật khẩu cũ"
+            autoComplete="current-password"
+          />
+        </Form.Item>
+        <Form.Item
+          label="Mật khẩu mới"
+          name="newPassword"
+          rules={[
+            { required: true, message: 'Vui lòng nhập mật khẩu mới!' },
+            { min: 8, message: 'Mật khẩu phải có ít nhất 8 ký tự!' },
+          ]}
+        >
+          <Input.Password
+            placeholder="Nhập mật khẩu mới"
+            autoComplete="new-password"
+          />
+        </Form.Item>
+        <Form.Item
+          label="Nhập lại mật khẩu mới"
+          name="confirmPassword"
+          dependencies={['newPassword']}
+          rules={[
+            { required: true, message: 'Vui lòng nhập lại mật khẩu mới!' },
+            ({ getFieldValue }) => ({
+              validator(_, value) {
+                if (!value || getFieldValue('newPassword') === value) {
+                  return Promise.resolve();
+                }
+                return Promise.reject(
+                  new Error('Mật khẩu nhập lại không khớp!'),
+                );
+              },
+            }),
+          ]}
+        >
+          <Input.Password
+            placeholder="Nhập lại mật khẩu mới"
+            autoComplete="new-password"
+          />
+        </Form.Item>
+        <Form.Item className="text-center mt-6">
+          <Button
+            type="primary"
+            htmlType="submit"
+            loading={loading}
+            className="px-8 py-2 rounded-xl text-base font-semibold border-0"
+            style={{
+              boxShadow: '0 4px 16px 0 rgba(56, 189, 248, 0.10)',
+            }}
+          >
+            Đổi mật khẩu
+          </Button>
+        </Form.Item>
+      </Form>
+      <div className="mt-8 p-4 bg-amber-50 rounded-xl border border-amber-200 shadow-sm">
+        <p className="text-amber-800 text-sm">
+          <strong>Lưu ý:</strong> Mật khẩu mới phải có ít nhất 8 ký tự, bao gồm
+          chữ hoa, chữ thường và số.
+        </p>
+      </div>
+    </Card>
   );
 };
 
