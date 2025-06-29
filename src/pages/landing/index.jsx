@@ -11,6 +11,7 @@ import {
 } from '@ant-design/icons';
 import HeroSection from '../../components/HeroSection';
 import FeatureCard from '../../components/FeatureCard';
+import TestimonialsSection from '../../components/TestimonialsSection';
 
 const { Search } = Input;
 
