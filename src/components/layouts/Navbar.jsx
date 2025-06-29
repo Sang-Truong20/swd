@@ -32,7 +32,12 @@ const Navbar = () => {
           <div className="flex items-center">
             <Link to="/" className="group flex items-center space-x-2">
               <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-2xl transform hover:scale-105 transition-all duration-300">
-                <span className="text-white font-bold text-2xl">L</span>
+                <span className="text-white font-bold text-xl">SL</span>
+              </div>
+              <div className="hidden lg:block">
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent">
+                  Smart<span className="text-blue-500">Law</span><span className="text-indigo-600">GT</span>
+                </h1>
               </div>
             </Link>
           </div>

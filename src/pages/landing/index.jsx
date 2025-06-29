@@ -12,6 +12,7 @@ import {
 import HeroSection from '../../components/HeroSection';
 import FeatureCard from '../../components/FeatureCard';
 import TestimonialsSection from '../../components/TestimonialsSection';
+import './styles.css';
 
 const { Search } = Input;
 
@@ -79,33 +80,44 @@ const LandingPage = () => {
       />
 
       {/* Search Section */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-white search-section">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-            Tìm kiếm thông tin pháp luật
-          </h2>
-          <p className="text-lg text-gray-600 mb-8">
-            Nhập từ khóa để tìm kiếm các điều luật, văn bản quy phạm pháp luật phù hợp
-          </p>
-          <div className="max-w-2xl mx-auto">
-            <Search
-              placeholder="Nhập từ khóa tìm kiếm..."
-              enterButton={<Button type="primary" icon={<SearchOutlined />} loading={loading}>Tìm kiếm</Button>}
-              size="large"
-              onSearch={handleSearch}
-              className="text-lg"
-            />
+          <div className="animate-fade-in">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+              Tìm kiếm thông tin pháp luật
+            </h2>
+            <p className="text-lg text-gray-600 mb-8">
+              Nhập từ khóa để tìm kiếm các điều luật, văn bản quy phạm pháp luật phù hợp
+            </p>
+            <div className="max-w-2xl mx-auto">
+              <Search
+                placeholder="Nhập từ khóa tìm kiếm..."
+                enterButton={
+                  <Button 
+                    type="primary" 
+                    icon={<SearchOutlined />} 
+                    loading={loading}
+                    className="btn-primary"
+                  >
+                    Tìm kiếm
+                  </Button>
+                }
+                size="large"
+                onSearch={handleSearch}
+                className="text-lg search-input"
+              />
+            </div>
+            <p className="text-sm text-gray-500 mt-4">
+              Ví dụ: "luật lao động", "hợp đồng mua bán", "quyền sở hữu trí tuệ"
+            </p>
           </div>
-          <p className="text-sm text-gray-500 mt-4">
-            Ví dụ: "luật lao động", "hợp đồng mua bán", "quyền sở hữu trí tuệ"
-          </p>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-gray-50">
+      <section id="features" className="py-20 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16 animate-fade-in">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
               Tính năng nổi bật
             </h2>
@@ -116,22 +128,14 @@ const LandingPage = () => {
           <Row gutter={[32, 32]}>
             {features.map((feature, index) => (
               <Col xs={24} md={12} lg={8} key={index}>
-                <Card 
-                  className="h-full hover:shadow-lg transition-all duration-300 border-0 rounded-xl"
-                  bodyStyle={{ padding: '32px 24px' }}
-                >
-                  <div className="text-center space-y-4">
-                    <div className="mb-4">
-                      {feature.icon}
-                    </div>
-                    <h3 className="text-xl font-semibold text-gray-800">
-                      {feature.title}
-                    </h3>
-                    <p className="text-gray-600 leading-relaxed">
-                      {feature.description}
-                    </p>
-                  </div>
-                </Card>
+                <div className="animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
+                  <FeatureCard
+                    icon={<div className="feature-icon">{feature.icon}</div>}
+                    title={feature.title}
+                    description={feature.description}
+                    className="feature-card hover-lift"
+                  />
+                </div>
               </Col>
             ))}
           </Row>
@@ -139,30 +143,30 @@ const LandingPage = () => {
       </section>
 
       {/* Statistics Section */}
-      <section className="py-16 bg-blue-600">
+      <section className="py-16 bg-gradient-to-r from-blue-600 to-indigo-700">
         <div className="max-w-6xl mx-auto px-4">
           <Row gutter={[32, 32]} className="text-center">
             <Col xs={12} md={6}>
-              <div className="text-white">
-                <div className="text-4xl font-bold mb-2">1000+</div>
+              <div className="text-white hover-lift">
+                <div className="text-4xl font-bold mb-2 stat-number">1000+</div>
                 <div className="text-blue-200">Văn bản pháp luật</div>
               </div>
             </Col>
             <Col xs={12} md={6}>
-              <div className="text-white">
-                <div className="text-4xl font-bold mb-2">24/7</div>
+              <div className="text-white hover-lift">
+                <div className="text-4xl font-bold mb-2 stat-number">24/7</div>
                 <div className="text-blue-200">Hỗ trợ liên tục</div>
               </div>
             </Col>
             <Col xs={12} md={6}>
-              <div className="text-white">
-                <div className="text-4xl font-bold mb-2">99%</div>
+              <div className="text-white hover-lift">
+                <div className="text-4xl font-bold mb-2 stat-number">99%</div>
                 <div className="text-blue-200">Độ chính xác</div>
               </div>
             </Col>
             <Col xs={12} md={6}>
-              <div className="text-white">
-                <div className="text-4xl font-bold mb-2">5000+</div>
+              <div className="text-white hover-lift">
+                <div className="text-4xl font-bold mb-2 stat-number">5000+</div>
                 <div className="text-blue-200">Người dùng tin tưởng</div>
               </div>
             </Col>
@@ -170,29 +174,35 @@ const LandingPage = () => {
         </div>
       </section>
 
+      {/* Testimonials Section */}
+      <TestimonialsSection />
+
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-r from-indigo-600 to-blue-700">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
-            Sẵn sàng bắt đầu với SmartLawGT?
-          </h2>
-          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Hãy trải nghiệm ngay hôm nay để khám phá sức mạnh của công nghệ trong việc tra cứu pháp luật
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-              type="primary" 
-              size="large" 
-              className="bg-yellow-500 border-yellow-500 hover:bg-yellow-600 font-semibold px-8 py-3 h-auto"
-            >
-              Dùng thử miễn phí
-            </Button>
-            <Button 
-              size="large" 
-              className="border-white text-white hover:bg-white hover:text-blue-700 font-semibold px-8 py-3 h-auto"
-            >
-              Liên hệ tư vấn
-            </Button>
+          <div className="animate-fade-in">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+              Sẵn sàng bắt đầu với SmartLawGT?
+            </h2>
+            <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+              Hãy trải nghiệm ngay hôm nay để khám phá sức mạnh của công nghệ trong việc tra cứu pháp luật
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button 
+                type="primary" 
+                size="large" 
+                onClick={handleGetStarted}
+                className="bg-yellow-500 border-yellow-500 hover:bg-yellow-600 hover:border-yellow-600 font-semibold px-8 py-3 h-auto btn-primary cta-glow"
+              >
+                Dùng thử miễn phí
+              </Button>
+              <Button 
+                size="large" 
+                className="border-white text-white hover:bg-white hover:text-blue-700 font-semibold px-8 py-3 h-auto"
+              >
+                Liên hệ tư vấn
+              </Button>
+            </div>
           </div>
         </div>
       </section>
