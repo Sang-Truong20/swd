@@ -9,6 +9,8 @@ import {
   TeamOutlined,
   RightOutlined
 } from '@ant-design/icons';
+import HeroSection from '../../components/HeroSection';
+import FeatureCard from '../../components/FeatureCard';
 
 const { Search } = Input;
 
@@ -57,76 +59,23 @@ const LandingPage = () => {
     }, 1000);
   };
 
+  const handleGetStarted = () => {
+    // Navigate to main app or registration
+    console.log('Get started clicked');
+  };
+
+  const handleLearnMore = () => {
+    // Scroll to features section or navigate to about page
+    document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Hero Section */}
-      <section className="relative py-20 bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-800">
-        <div className="absolute inset-0 bg-black opacity-10"></div>
-        <div className="relative max-w-6xl mx-auto px-4">
-          <Row gutter={[48, 32]} align="middle" className="min-h-[500px]">
-            <Col xs={24} md={12} className="text-center md:text-left">
-              <div className="space-y-6">
-                <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight">
-                  Smart<span className="text-yellow-400">Law</span>
-                  <span className="text-blue-200">GT</span>
-                </h1>
-                <p className="text-xl md:text-2xl text-blue-100 font-medium">
-                  Hệ thống tư vấn pháp luật thông minh
-                </p>
-                <div className="space-y-4">
-                  <p className="text-lg text-blue-50 leading-relaxed">
-                    Giải pháp công nghệ hàng đầu giúp bạn tra cứu, tìm hiểu và giải đáp mọi thắc mắc về pháp luật Việt Nam một cách nhanh chóng và chính xác.
-                  </p>
-                  <ul className="space-y-2 text-blue-50">
-                    <li className="flex items-center space-x-2">
-                      <RightOutlined className="text-yellow-400" />
-                      <span>Dựa trên công nghệ AI và machine learning tiên tiến</span>
-                    </li>
-                    <li className="flex items-center space-x-2">
-                      <RightOutlined className="text-yellow-400" />
-                      <span>Cơ sở dữ liệu pháp luật được cập nhật liên tục</span>
-                    </li>
-                    <li className="flex items-center space-x-2">
-                      <RightOutlined className="text-yellow-400" />
-                      <span>Giao diện thân thiện, dễ sử dụng</span>
-                    </li>
-                  </ul>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                  <Button 
-                    type="primary" 
-                    size="large" 
-                    className="bg-yellow-500 border-yellow-500 hover:bg-yellow-600 font-semibold px-8 py-3 h-auto"
-                  >
-                    Bắt đầu ngay
-                  </Button>
-                  <Button 
-                    size="large" 
-                    className="border-white text-white hover:bg-white hover:text-blue-700 font-semibold px-8 py-3 h-auto"
-                  >
-                    Tìm hiểu thêm
-                  </Button>
-                </div>
-              </div>
-            </Col>
-            <Col xs={24} md={12} className="text-center">
-              <div className="relative">
-                <div className="w-80 h-80 mx-auto bg-white bg-opacity-10 rounded-full flex items-center justify-center backdrop-blur-sm">
-                  <div className="w-64 h-64 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
-                    <BookOutlined className="text-8xl text-white" />
-                  </div>
-                </div>
-                <div className="absolute -top-4 -right-4 w-24 h-24 bg-yellow-400 rounded-full flex items-center justify-center">
-                  <SafetyOutlined className="text-3xl text-blue-800" />
-                </div>
-                <div className="absolute -bottom-4 -left-4 w-20 h-20 bg-blue-400 rounded-full flex items-center justify-center">
-                  <MessageOutlined className="text-2xl text-white" />
-                </div>
-              </div>
-            </Col>
-          </Row>
-        </div>
-      </section>
+      <HeroSection 
+        onGetStarted={handleGetStarted}
+        onLearnMore={handleLearnMore}
+      />
 
       {/* Search Section */}
       <section className="py-16 bg-white">
