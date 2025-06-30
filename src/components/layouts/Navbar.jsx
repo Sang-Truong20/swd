@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useNotificationStore } from '../../store/useNotificationStore';
 import NotificationBell from '../NotificationBell';
 import UserMenu from '../UserMenu';
 import NavElements from './NavElements';
@@ -7,7 +8,7 @@ import NavElements from './NavElements';
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
-  const [notificationCount] = useState(3);
+  const { count: notificationCount } = useNotificationStore();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);

@@ -1,3 +1,4 @@
+import { Badge } from 'antd';
 import { useState } from 'react';
 
 const NotificationBell = ({ count = 0 }) => {
@@ -48,9 +49,9 @@ const NotificationBell = ({ count = 0 }) => {
         </svg>
 
         {count > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
-            {count > 9 ? '9+' : count}
-          </span>
+          <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+            <Badge count={count}></Badge>
+          </div>
         )}
       </button>
 
