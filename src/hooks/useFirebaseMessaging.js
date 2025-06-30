@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { getToken, messaging, onMessage } from '../configs/firebase';
+import { useNotificationStore } from '../store/useNotificationStore';
 
 const WEBPUSH_KEY = import.meta.env.VITE_WEBPUSH_CER;
 
@@ -26,6 +27,7 @@ export const useFirebaseMessaging = () => {
     onMessage(messaging, (payload) => {
       console.log('Message received. ', payload);
       alert(payload?.data?.title + ': ' + payload?.data?.body);
+      useNotificationStore.getState().increase();
     });
   }, []);
 };
