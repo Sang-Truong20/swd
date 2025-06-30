@@ -14,22 +14,22 @@ const Footer = () => {
           <div className="lg:col-span-2 flex flex-col items-start space-y-6">
             <div className="flex items-center space-x-3">
               <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-2xl transform hover:scale-105 transition-all duration-300">
-                <span className="text-white font-bold text-2xl">L</span>
+                <span className="text-white font-bold text-xl">SL</span>
               </div>
               <div>
                 <span className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-white bg-clip-text text-transparent">
-                  LawTraffic
+                  SmartLawGT
                 </span>
                 <p className="text-blue-200 text-sm mt-1">
-                  Tư vấn luật giao thông - Cập nhật văn bản pháp lý mới nhất
+                  Hệ thống tư vấn pháp luật thông minh
                 </p>
               </div>
             </div>
 
             <p className="text-slate-300 leading-relaxed max-w-md">
-              Chúng tôi cung cấp nền tảng tư vấn và chia sẻ kiến thức pháp luật
-              giao thông toàn diện, giúp người dân hiểu rõ quyền và nghĩa vụ của
-              mình trong tham gia giao thông.
+              SmartLawGT cung cấp giải pháp công nghệ hàng đầu giúp bạn tra cứu, 
+              tìm hiểu và giải đáp mọi thắc mắc về pháp luật Việt Nam một cách 
+              nhanh chóng và chính xác.
             </p>
 
             <div className="flex space-x-4">
