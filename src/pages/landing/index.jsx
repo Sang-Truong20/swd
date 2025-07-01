@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { Row, Col, Button, Input, Card, Spin } from 'antd';
-import { 
-  SearchOutlined, 
-  MessageOutlined, 
-  BookOutlined, 
+import {
+  SearchOutlined,
+  MessageOutlined,
+  BookOutlined,
   FileTextOutlined,
   SafetyOutlined,
   TeamOutlined,
-  RightOutlined
+  RightOutlined,
 } from '@ant-design/icons';
 import HeroSection from '../../components/HeroSection';
 import FeatureCard from '../../components/FeatureCard';
 import TestimonialsSection from '../../components/TestimonialsSection';
 import './styles.css';
+import Packages from '../../components/Packages';
 
 const { Search } = Input;
 
@@ -22,33 +23,39 @@ const LandingPage = () => {
   const features = [
     {
       icon: <MessageOutlined className="text-4xl text-blue-600" />,
-      title: "Hỏi đáp thông minh",
-      description: "Trợ lý AI giải đáp các câu hỏi về pháp luật Việt Nam một cách chính xác và nhanh chóng.",
+      title: 'Hỏi đáp thông minh',
+      description:
+        'Trợ lý AI giải đáp các câu hỏi về pháp luật Việt Nam một cách chính xác và nhanh chóng.',
     },
     {
       icon: <BookOutlined className="text-4xl text-green-600" />,
-      title: "Tra cứu Pháp điển",
-      description: "Tra cứu Pháp điển Việt Nam hiện hành với giao diện thân thiện và dễ sử dụng.",
+      title: 'Tra cứu Pháp điển',
+      description:
+        'Tra cứu Pháp điển Việt Nam hiện hành với giao diện thân thiện và dễ sử dụng.',
     },
     {
       icon: <FileTextOutlined className="text-4xl text-orange-600" />,
-      title: "Văn bản QPPL",
-      description: "Tìm kiếm và tra cứu các văn bản quy phạm pháp luật một cách toàn diện.",
+      title: 'Văn bản QPPL',
+      description:
+        'Tìm kiếm và tra cứu các văn bản quy phạm pháp luật một cách toàn diện.',
     },
     {
       icon: <SafetyOutlined className="text-4xl text-red-600" />,
-      title: "Đáng tin cậy",
-      description: "Thông tin được cập nhật liên tục từ các nguồn pháp luật chính thức.",
+      title: 'Đáng tin cậy',
+      description:
+        'Thông tin được cập nhật liên tục từ các nguồn pháp luật chính thức.',
     },
     {
       icon: <TeamOutlined className="text-4xl text-purple-600" />,
-      title: "Hỗ trợ 24/7",
-      description: "Luôn sẵn sàng hỗ trợ bạn mọi lúc, mọi nơi với các vấn đề pháp lý.",
+      title: 'Hỗ trợ 24/7',
+      description:
+        'Luôn sẵn sàng hỗ trợ bạn mọi lúc, mọi nơi với các vấn đề pháp lý.',
     },
     {
       icon: <SearchOutlined className="text-4xl text-cyan-600" />,
-      title: "Tìm kiếm nâng cao",
-      description: "Công cụ tìm kiếm thông minh giúp bạn tìm thông tin chính xác nhất.",
+      title: 'Tìm kiếm nâng cao',
+      description:
+        'Công cụ tìm kiếm thông minh giúp bạn tìm thông tin chính xác nhất.',
     },
   ];
 
@@ -74,7 +81,7 @@ const LandingPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       {/* Hero Section */}
-      <HeroSection 
+      <HeroSection
         onGetStarted={handleGetStarted}
         onLearnMore={handleLearnMore}
       />
@@ -87,15 +94,16 @@ const LandingPage = () => {
               Tìm kiếm thông tin pháp luật
             </h2>
             <p className="text-lg text-gray-600 mb-8">
-              Nhập từ khóa để tìm kiếm các điều luật, văn bản quy phạm pháp luật phù hợp
+              Nhập từ khóa để tìm kiếm các điều luật, văn bản quy phạm pháp luật
+              phù hợp
             </p>
             <div className="max-w-2xl mx-auto">
               <Search
                 placeholder="Nhập từ khóa tìm kiếm..."
                 enterButton={
-                  <Button 
-                    type="primary" 
-                    icon={<SearchOutlined />} 
+                  <Button
+                    type="primary"
+                    icon={<SearchOutlined />}
                     loading={loading}
                     className="btn-primary"
                   >
@@ -122,13 +130,17 @@ const LandingPage = () => {
               Tính năng nổi bật
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              SmartLawGT cung cấp các tính năng mạnh mẽ giúp bạn tiếp cận thông tin pháp luật một cách hiệu quả nhất
+              SmartLawGT cung cấp các tính năng mạnh mẽ giúp bạn tiếp cận thông
+              tin pháp luật một cách hiệu quả nhất
             </p>
           </div>
           <Row gutter={[32, 32]}>
             {features.map((feature, index) => (
               <Col xs={24} md={12} lg={8} key={index}>
-                <div className="animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
+                <div
+                  className="animate-fade-in"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
                   <FeatureCard
                     icon={<div className="feature-icon">{feature.icon}</div>}
                     title={feature.title}
@@ -141,6 +153,8 @@ const LandingPage = () => {
           </Row>
         </div>
       </section>
+
+      <Packages></Packages>
 
       {/* Statistics Section */}
       <section className="py-16 bg-gradient-to-r from-blue-600 to-indigo-700">
@@ -185,19 +199,20 @@ const LandingPage = () => {
               Sẵn sàng bắt đầu với SmartLawGT?
             </h2>
             <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-              Hãy trải nghiệm ngay hôm nay để khám phá sức mạnh của công nghệ trong việc tra cứu pháp luật
+              Hãy trải nghiệm ngay hôm nay để khám phá sức mạnh của công nghệ
+              trong việc tra cứu pháp luật
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                type="primary" 
-                size="large" 
+              <Button
+                type="primary"
+                size="large"
                 onClick={handleGetStarted}
                 className="bg-yellow-500 border-yellow-500 hover:bg-yellow-600 hover:border-yellow-600 font-semibold px-8 py-3 h-auto btn-primary cta-glow"
               >
                 Dùng thử miễn phí
               </Button>
-              <Button 
-                size="large" 
+              <Button
+                size="large"
                 className="border-white text-white hover:bg-white hover:text-blue-700 font-semibold px-8 py-3 h-auto"
               >
                 Liên hệ tư vấn
