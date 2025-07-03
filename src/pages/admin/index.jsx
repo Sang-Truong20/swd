@@ -1,5 +1,8 @@
+import React from 'react';
+import Dashboard from './Dashboard';
+
 const AdminHome = () => {
-  return <div>AdminHome</div>;
+  return <Dashboard />;
 };
 
 export default AdminHome;
