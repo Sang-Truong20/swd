@@ -1,3 +1,4 @@
+import { useMutation } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import {
   FaBars,
@@ -10,6 +11,7 @@ import {
   FaUser,
   FaUserTie,
 } from 'react-icons/fa';
+import { chatWithGemini } from '../../services/chat';
 
 const mockConversations = [
   {
@@ -59,6 +61,16 @@ const initialMessages = {
   3: [],
 };
 
+const lawQuickOptions = [
+  'Quy định vượt đèn đỏ',
+  'Bảo hiểm xe bắt buộc',
+  'Xử phạt không đội mũ bảo hiểm',
+  'Thủ tục cấp lại giấy phép lái xe',
+  'Quy định về tai nạn giao thông',
+  'Mức phạt nồng độ cồn',
+  'Quy định về biển số xe',
+];
+
 const ChatBot = () => {
   const [conversations, setConversations] = useState(mockConversations);
   const [selectedConv, setSelectedConv] = useState(1);
@@ -68,6 +80,17 @@ const ChatBot = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showWelcomeBanner, setShowWelcomeBanner] = useState(true);
   const chatContainerRef = useRef(null);
+  const { mutate: chat, isPending } = useMutation({
+    mutationFn: chatWithGemini,
+    onSuccess: (data) => {
+      console.log('check  data', data);
+      // navigate('/');
+      alert('123');
+    },
+    onError: (err) => {
+      console.error('err', err);
+    },
+  });
 
   const scrollToBottom = () => {
     if (chatContainerRef.current) {
@@ -80,7 +103,7 @@ const ChatBot = () => {
     setTimeout(scrollToBottom, 50);
   }, [messages, selectedConv]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim() || isLoading) return;
 
     const now = new Date();
@@ -106,51 +129,59 @@ const ChatBot = () => {
     setInput('');
     setIsLoading(true);
 
-    setTimeout(
-      () => {
-        const responses = [
-          'Cảm ơn bạn đã gửi câu hỏi. Theo Nghị định 100/2019/NĐ-CP, tôi sẽ phân tích chi tiết cho bạn.',
-          'Đây là vấn đề quan trọng trong luật giao thông. Dựa trên quy định hiện hành, tôi khuyên bạn nên...',
-          'Tôi hiểu tình huống của bạn. Theo Luật Giao thông đường bộ 2008 (sửa đổi 2012), vấn đề này được quy định như sau...',
-          'Dựa trên kinh nghiệm tư vấn, trường hợp của bạn thuộc diện cần xem xét kỹ. Hãy cung cấp thêm thông tin để tôi tư vấn chính xác nhất.',
-          'Theo quy định mới nhất, tôi sẽ hướng dẫn bạn từng bước để giải quyết vấn đề này một cách hiệu quả.',
-        ];
-
-        const randomResponse =
-          responses[Math.floor(Math.random() * responses.length)];
-
-        setMessages((prev) => ({
-          ...prev,
-          [selectedConv]: [
-            ...(prev[selectedConv] || []),
-            {
-              sender: 'other',
-              text: randomResponse,
-              time: new Date().toLocaleTimeString('vi-VN', {
-                hour: '2-digit',
-                minute: '2-digit',
-              }),
-            },
-          ],
-        }));
-        setConversations((prev) =>
-          prev.map((conv) =>
-            conv.id === selectedConv
-              ? {
-                  ...conv,
-                  lastMessage: randomResponse,
-                  time: new Date().toLocaleTimeString('vi-VN', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  }),
-                }
-              : conv,
-          ),
-        );
-        setIsLoading(false);
-      },
-      1500 + Math.random() * 1000,
-    );
+    try {
+      const res = await chatWithGemini(
+        input.trim(),
+        '2ca20ee0-88b9-4aac-b7a6-21088201b8df',
+      );
+      const answer =
+        res?.data?.answer || res?.data || 'Không nhận được phản hồi từ server.';
+      setMessages((prev) => ({
+        ...prev,
+        [selectedConv]: [
+          ...(prev[selectedConv] || []),
+          {
+            sender: 'other',
+            text: answer,
+            time: new Date().toLocaleTimeString('vi-VN', {
+              hour: '2-digit',
+              minute: '2-digit',
+            }),
+          },
+        ],
+      }));
+      setConversations((prev) =>
+        prev.map((conv) =>
+          conv.id === selectedConv
+            ? {
+                ...conv,
+                lastMessage: answer,
+                time: new Date().toLocaleTimeString('vi-VN', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                }),
+              }
+            : conv,
+        ),
+      );
+    } catch (err) {
+      setMessages((prev) => ({
+        ...prev,
+        [selectedConv]: [
+          ...(prev[selectedConv] || []),
+          {
+            sender: 'other',
+            text: 'Có lỗi xảy ra khi gửi câu hỏi. Vui lòng thử lại.',
+            time: new Date().toLocaleTimeString('vi-VN', {
+              hour: '2-digit',
+              minute: '2-digit',
+            }),
+          },
+        ],
+      }));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleKeyPress = (e) => {
@@ -179,82 +210,6 @@ const ChatBot = () => {
       style={{ height: 'calc(100vh - 71px)' }}
     >
       <div className="flex-1 flex min-h-0">
-        <div
-          className={`${isSidebarOpen ? 'w-80' : 'w-0'} lg:w-80 bg-blue-50 border-r border-blue-200 flex flex-col transition-all duration-300 ${isSidebarOpen ? 'block' : 'hidden lg:flex'} flex-shrink-0`}
-        >
-          <div className="p-4 border-b border-blue-200">
-            <div className="relative">
-              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-400 text-sm" />
-              <input
-                type="text"
-                placeholder="Tìm kiếm luật sư..."
-                className="w-full pl-10 pr-4 py-3 bg-white border border-blue-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-gray-700 placeholder-gray-400"
-              />
-            </div>
-          </div>
-
-          <div className="flex-1 overflow-y-auto scrollbar-hide">
-            <div className="p-4">
-              <h3 className="font-semibold text-blue-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wide">
-                <FaComments className="text-blue-600" />
-                Chuyên gia trực tuyến (
-                {mockConversations.filter((c) => c.status === 'online').length})
-              </h3>
-
-              <div className="space-y-3">
-                {conversations.map((conv) => (
-                  <div
-                    key={conv.id}
-                    className={`group p-4 rounded-2xl cursor-pointer transition-all duration-200 ${
-                      selectedConv === conv.id
-                        ? 'bg-blue-100 border border-blue-300 shadow-md'
-                        : 'hover:bg-blue-50 border border-transparent hover:border-blue-200'
-                    }`}
-                    onClick={() => setSelectedConv(conv.id)}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="relative">
-                        <div
-                          className={`p-3 rounded-full ${selectedConv === conv.id ? 'bg-blue-600' : 'bg-blue-500'} transition-all shadow-md`}
-                        >
-                          <FaUserTie className="text-white text-sm" />
-                        </div>
-                        <div
-                          className={`absolute -bottom-1 -right-1 w-4 h-4 ${getStatusColor(conv.status)} rounded-full border-2 border-white`}
-                        ></div>
-                      </div>
-
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-1">
-                          <h4 className="font-semibold text-gray-800 truncate text-sm">
-                            {conv.name}
-                          </h4>
-                          <span className="text-xs text-gray-500">
-                            {conv.time}
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-600 truncate leading-relaxed">
-                          {conv.lastMessage}
-                        </p>
-                        <div className="flex items-center gap-2 mt-2">
-                          <FaCircle
-                            className={`text-xs ${conv.status === 'online' ? 'text-green-500' : 'text-yellow-500'}`}
-                          />
-                          <span className="text-xs text-gray-500 capitalize">
-                            {conv.status === 'online'
-                              ? 'Trực tuyến'
-                              : 'Vắng mặt'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
         <div className="flex-1 flex flex-col min-w-0">
           <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 bg-blue-600 border-b border-blue-700">
             <div className="flex items-center gap-4">
@@ -295,6 +250,20 @@ const ChatBot = () => {
             <button className="p-2 hover:bg-blue-700 rounded-lg transition-colors">
               <FaEllipsisV className="text-blue-100" />
             </button>
+          </div>
+
+          <div className="flex flex-wrap gap-2 px-6 py-3 bg-blue-50 border-b border-blue-200">
+            {lawQuickOptions.map((option, idx) => (
+              <button
+                key={idx}
+                className="px-4 py-2 rounded-2xl bg-white border border-blue-200 text-blue-700 text-sm font-medium shadow-sm hover:bg-blue-100 hover:border-blue-400 transition-all duration-150"
+                onClick={() => setInput(option)}
+                disabled={isLoading}
+                type="button"
+              >
+                {option}
+              </button>
+            ))}
           </div>
 
           {/* Welcome Banner */}
@@ -405,42 +374,44 @@ const ChatBot = () => {
           </div>
 
           <div className="flex-shrink-0 p-6 bg-white border-t border-blue-200">
-            <div className="flex gap-3 items-center">
-              <div className="flex-1 relative">
-                <textarea
-                  className="w-full border-2 border-blue-200 rounded-3xl px-6 py-4 pr-12 outline-none focus:ring-[0.5px] focus:ring-blue-500 focus:border-blue-500 bg-white resize-none transition-all duration-200 placeholder-gray-400 text-gray-700 scrollbar-hide"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyPress}
-                  placeholder="Mô tả tình huống hoặc đặt câu hỏi về luật giao thông..."
-                  rows="1"
-                  style={{ minHeight: '56px', maxHeight: '120px' }}
-                  disabled={isLoading}
-                />
-                <div className="absolute right-4 bottom-4 text-xs text-gray-400">
-                  {input.length}/500
+            <div className="flex flex-col gap-2">
+              <div className="flex gap-3 items-end">
+                <div className="flex-1 relative">
+                  <textarea
+                    className="w-full border-2 border-blue-200 rounded-3xl px-6 py-4 pr-12 outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-500 bg-white resize-none transition-all duration-200 placeholder-gray-400 text-gray-700 scrollbar-hide shadow-sm focus:shadow-lg"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyPress}
+                    placeholder="Mô tả tình huống hoặc chọn nhanh chủ đề luật giao thông..."
+                    rows="1"
+                    style={{ minHeight: '56px', maxHeight: '120px' }}
+                    disabled={isLoading}
+                  />
+                  <div className="absolute right-4 bottom-4 text-xs text-gray-400">
+                    {input.length}/500
+                  </div>
                 </div>
+                <button
+                  className={`px-8 py-4 rounded-3xl font-semibold shadow-lg transition-all duration-200 flex items-center gap-3 min-w-[100px] justify-center ${
+                    input.trim() && !isLoading
+                      ? 'bg-blue-600 text-white hover:bg-blue-700 hover:shadow-xl transform hover:-translate-y-1 active:scale-95'
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
+                  onClick={handleSend}
+                  disabled={!input.trim() || isLoading}
+                  type="button"
+                >
+                  {isLoading ? (
+                    <div className="w-4 h-4 border-2 border-gray-300 border-t-white rounded-full animate-spin"></div>
+                  ) : (
+                    <FaPaperPlane className="text-sm" />
+                  )}
+                  <span className="hidden sm:inline">Gửi</span>
+                </button>
               </div>
-              <button
-                className={`px-8 py-4 rounded-3xl  font-semibold shadow-lg transition-all duration-200 flex items-center gap-3 min-w-[100px] justify-center ${
-                  input.trim() && !isLoading
-                    ? 'bg-blue-600 text-white hover:bg-blue-700 hover:shadow-xl transform hover:-translate-y-1 active:scale-95'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
-                onClick={handleSend}
-                disabled={!input.trim() || isLoading}
-              >
-                {isLoading ? (
-                  <div className="w-4 h-4 border-2 border-gray-300 border-t-white rounded-full animate-spin"></div>
-                ) : (
-                  <FaPaperPlane className="text-sm" />
-                )}
-                <span className="hidden sm:inline">Gửi</span>
-              </button>
-            </div>
-
-            <div className="flex items-center justify-between mt-3 text-xs text-gray-500">
-              <span>💡 Nhấn Enter để gửi, Shift+Enter để xuống dòng</span>
+              <div className="flex items-center justify-between mt-1 text-xs text-gray-500">
+                <span>💡 Nhấn Enter để gửi, Shift+Enter để xuống dòng</span>
+              </div>
             </div>
           </div>
         </div>
