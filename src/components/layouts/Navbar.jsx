@@ -37,7 +37,8 @@ const Navbar = () => {
               </div>
               <div className="hidden lg:block">
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent">
-                  Smart<span className="text-blue-500">Law</span><span className="text-indigo-600">GT</span>
+                  Smart<span className="text-blue-500">Law</span>
+                  <span className="text-indigo-600">GT</span>
                 </h1>
               </div>
             </Link>
