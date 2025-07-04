@@ -23,10 +23,10 @@ const NAV_ELEMENTS = [
     name: 'BÀI VIẾT',
     path: '#',
   },
-  {
-    name: 'TRỢ LÝ ẢO',
-    path: PATH_NAME.CHAT_BOT,
-  },
+  // {
+  //   name: 'TRỢ LÝ ẢO',
+  //   path: PATH_NAME.CHAT_BOT,
+  // },
   {
     name: 'VỀ CHÚNG TÔI',
     path: '/contact',
