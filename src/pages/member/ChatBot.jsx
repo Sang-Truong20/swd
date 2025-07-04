@@ -1,8 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   FaBalanceScale,
-  FaCircle,
   FaGavel,
   FaLightbulb,
   FaPaperPlane,
@@ -54,7 +53,7 @@ const ChatBot = ({ onClose }) => {
   const chatContainerRef = useRef(null);
   const textareaRef = useRef(null);
 
-  const userId = '12cae9be-2b04-4144-a836-468d1449399a';
+  const userId = useMemo(() => '12cae9be-2b04-4144-a836-468d1449399a', []);
 
   const { data: messagesList } = useQuery({
     queryKey: ['chatHistory', userId],
@@ -62,11 +61,13 @@ const ChatBot = ({ onClose }) => {
     enabled: !!userId,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
+    refetchInterval: false,
+    retry: 3,
   });
 
   const listMessage = (messagesList && messagesList.data) || [];
 
-  const transformedMessages = () => {
+  const transformedMessages = useMemo(() => {
     const groupedMessages = [];
     let lastDateKey = null;
 
@@ -108,12 +109,21 @@ const ChatBot = ({ onClose }) => {
     });
 
     return groupedMessages;
-  };
+  }, [listMessage]);
 
   useEffect(() => {
     if (listMessage.length > 0) {
-      setMessages(transformedMessages());
-    } else {
+      const newMessages = transformedMessages();
+
+      // So sánh để tránh setMessages gây loop
+      const isDifferent =
+        newMessages.length !== messages.length ||
+        newMessages.some((msg, i) => msg.timestamp !== messages[i]?.timestamp);
+
+      if (isDifferent) {
+        setMessages(newMessages);
+      }
+    } else if (messages.length === 0) {
       setMessages([
         {
           type: 'message',
@@ -242,6 +252,7 @@ const ChatBot = ({ onClose }) => {
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
+      ``;
       e.preventDefault();
       handleSend();
     }
@@ -273,7 +284,6 @@ const ChatBot = ({ onClose }) => {
                   SmartLaw AI
                 </h3>
                 <p className="text-sm text-white/90 flex items-center gap-2 mt-1">
-                  <FaCircle className="text-xs text-green-400" />
                   Tư vấn pháp luật 24/7
                 </p>
               </div>
