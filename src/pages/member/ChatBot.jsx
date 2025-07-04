@@ -163,7 +163,6 @@ const ChatBot = ({ onClose }) => {
       minute: '2-digit',
     });
 
-    // Check if we need to add a date separator
     const lastMessage = messages[messages.length - 1];
     const needDateSeparator =
       lastMessage &&
@@ -257,7 +256,6 @@ const ChatBot = ({ onClose }) => {
           showAnimation ? 'animate-pulse' : ''
         }`}
       >
-        {/* Header */}
         <div className="relative bg-blue-700 p-6">
           <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
           <div className="relative flex items-center justify-between">
@@ -292,7 +290,6 @@ const ChatBot = ({ onClose }) => {
           </div>
         </div>
 
-        {/* Messages Container */}
         <div
           ref={chatContainerRef}
           className="flex-1 overflow-y-auto px-6 mb-3 space-y-4 bg-gradient-to-br from-gray-50 via-white to-indigo-50/20"
@@ -303,7 +300,7 @@ const ChatBot = ({ onClose }) => {
         >
           {showQuickOptions && (
             <div className="mb-8 animate-fade-in">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3 mt-5">
                 {quickOptions.map((option, idx) => (
                   <button
                     key={idx}
@@ -340,9 +337,7 @@ const ChatBot = ({ onClose }) => {
               >
                 <div
                   className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center shadow-md ${
-                    item.sender === 'me'
-                      ? 'bg-gradient-to-br from-blue-500 to-indigo-600'
-                      : 'bg-gradient-to-br from-purple-500 to-indigo-600'
+                    item.sender === 'me' ? 'bg-gray-600' : 'bg-blue-600'
                   }`}
                 >
                   {item.sender === 'me' ? (
@@ -378,7 +373,6 @@ const ChatBot = ({ onClose }) => {
             );
           })}
 
-          {/* Typing Indicator */}
           {isTyping && (
             <div className="flex items-start gap-3 animate-fade-in">
               <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-md">
@@ -401,7 +395,6 @@ const ChatBot = ({ onClose }) => {
           )}
         </div>
 
-        {/* Input Area */}
         <div className="p-6 bg-white/80 backdrop-blur-sm border-t border-gray-100">
           <div className="flex gap-3 items-center bg-white rounded-2xl p-2 shadow-lg border border-gray-200 hover:shadow-xl transition-shadow">
             <textarea
