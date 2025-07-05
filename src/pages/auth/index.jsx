@@ -1,5 +1,6 @@
 import { CarOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { useState } from 'react';
+import { FaBalanceScale } from 'react-icons/fa';
 import Login from './login';
 import Register from './register';
 
@@ -18,7 +19,7 @@ function AuthPage() {
           <div className="mb-12">
             <div className="flex items-center gap-3 mb-8">
               <div className="w-16 h-16 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center">
-                <CarOutlined className="text-3xl !text-white" />
+                <FaBalanceScale className="text-3xl !text-white" />
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-white">LawTraffic</h1>

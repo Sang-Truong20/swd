@@ -1,51 +1,57 @@
 import {
   EyeInvisibleOutlined,
   EyeOutlined,
+  FileSearchOutlined,
   LockOutlined,
   MailOutlined,
   UserAddOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import { Button, Form, Input } from 'antd';
+import { useMutation } from '@tanstack/react-query';
+import { Button, DatePicker, Form, Input } from 'antd';
+import dayjs from 'dayjs';
 import { useState } from 'react';
-import ReCAPTCHA from 'react-google-recaptcha';
 import { Link } from 'react-router-dom';
+import { register } from '../../../services/auth';
+import { notify } from '../../../utils';
 
 function Register({ onSwitchToLogin }) {
-  const recaptchaSiteKey = import.meta.env.VITE_APP_RECAPTCHA_SITE_KEY || '';
   const [form] = Form.useForm();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [captchaVerified, setCaptchaVerified] = useState(false);
-  const [loading, setLoading] = useState(false);
 
-  const onCaptchaChange = (value) => {
-    if (value) {
-      setCaptchaVerified(true);
-    } else {
-      setCaptchaVerified(false);
-    }
-  };
+  const { mutate: registerMutate, isPending } = useMutation({
+    mutationFn: register,
+    onSuccess: () => {
+      notify('success', { description: 'Đăng ký tài khoản thành công' });
+      onSwitchToLogin();
+    },
+    onError: (err) => {
+      if (err && err.status === 401) {
+        notify('error', { description: 'Thông tin đăng ký không hợp lệ' });
+        return;
+      }
+      notify('error', { description: 'Lỗi hệ thống' });
+    },
+  });
 
   const togglePassword = () => setShowPassword((prev) => !prev);
   const toggleConfirmPassword = () => setShowConfirmPassword((prev) => !prev);
 
   const handleSubmit = async (values) => {
-    setLoading(true);
+    // eslint-disable-next-line no-unused-vars
+    const { confirmPassword, ...rest } = values;
 
-    if (!captchaVerified) {
-      toast.message('warning', 'Vui lòng xác nhận reCAPTCHA', 3);
-      return;
-    }
-    setTimeout(() => {
-      console.log('Register data:', values);
-      setLoading(false);
-      onSwitchToLogin();
-    }, 1500);
+    const payload = {
+      ...rest,
+      birthday: values.birthday.format('YYYY-MM-DD'),
+    };
+
+    registerMutate(payload);
   };
 
   return (
-    <div className="bg-white relative rounded-2xl shadow-xl p-8 md:p-10">
+    <div className="bg-white relative rounded-2xl shadow-xl p-5 md:p-8">
       <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-20 h-1 bg-blue-600 rounded-b-full" />
 
       <div className="text-center mb-8">
@@ -65,53 +71,90 @@ function Register({ onSwitchToLogin }) {
         scrollToFirstError
       >
         <Form.Item
-          name="fullname"
-          rules={[
-            { required: true, message: 'Vui lòng nhập họ và tên!' },
-            { min: 3, message: 'Họ và tên tối thiểu 3 ký tự' },
-            {
-              pattern: /^[a-zA-ZÀ-ỹ\s]+$/,
-              message: 'Họ và tên chỉ được chứa chữ cái và khoảng trắng',
-            },
-          ]}
-          className="[&_.ant-form-item-explain]:text-left mb-4"
-        >
-          <Input
-            prefix={<UserOutlined className="text-gray-400" />}
-            placeholder="Họ và tên"
-            autoFocus
-            size="large"
-            className="!py-3 !px-4 !text-base !rounded-lg"
-          />
-        </Form.Item>
-
-        <Form.Item
-          name="usernameOrEmail"
+          name="userName"
           rules={[
             {
               required: true,
-              message: 'Vui lòng nhập tên đăng nhập hoặc email!',
+              message: 'Vui lòng nhập tên đăng nhập',
             },
             { min: 8, message: 'Tên đăng nhập tối thiểu 8 ký tự' },
             {
               pattern: /^[a-zA-Z0-9._@]+$/,
-              message: 'Tên đăng nhập chỉ được chứa chữ cái, số và ký tự . _ @',
+              message: 'Tên đăng nhập chỉ được chứa chữ cái, số và ký tự',
             },
           ]}
           className="[&_.ant-form-item-explain]:text-left mb-4"
         >
           <Input
-            prefix={<MailOutlined />}
-            placeholder="Tên đăng nhập hoặc Email"
+            prefix={<FileSearchOutlined />}
+            placeholder="Tên đăng nhập"
             size="large"
             className="!py-3 !px-4 !text-base !rounded-lg"
           />
         </Form.Item>
+        <Form.Item
+          name="email"
+          rules={[
+            {
+              required: true,
+              message: 'Vui lòng nhập email!',
+            },
+            {
+              type: 'email',
+              message: 'Email không hợp lệ!',
+            },
+          ]}
+        >
+          <Input
+            prefix={<MailOutlined />}
+            placeholder="Email"
+            size="large"
+            className="!py-3 !px-4 !text-base !rounded-lg"
+          />
+        </Form.Item>
+        <div className="flex gap-2">
+          <Form.Item
+            name="name"
+            rules={[
+              { required: true, message: 'Vui lòng nhập họ và tên' },
+              { min: 3, message: 'Họ và tên tối thiểu 3 ký tự' },
+              {
+                pattern: /^[a-zA-ZÀ-ỹ\s]+$/,
+                message: 'Họ và tên chỉ được chứa chữ cái và khoảng trắng',
+              },
+            ]}
+            className="flex-1 [&_.ant-form-item-explain]:text-left"
+          >
+            <Input
+              prefix={<UserOutlined className="text-gray-400" />}
+              placeholder="Họ và tên"
+              autoFocus
+              size="large"
+              className="!py-3 !px-4 !text-base !rounded-lg"
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="birthday"
+            rules={[{ required: true, message: 'Vui lòng chọn ngày sinh' }]}
+            className="w-[40%] [&_.ant-form-item-explain]:text-left"
+          >
+            <DatePicker
+              placeholder="Ngày sinh"
+              format="YYYY/MM/DD"
+              size="large"
+              className="w-full !py-3 !px-4 !text-base !rounded-lg"
+              disabledDate={(current) => {
+                return current && current >= dayjs().startOf('day');
+              }}
+            />
+          </Form.Item>
+        </div>
 
         <Form.Item
           name="password"
           rules={[
-            { required: true, message: 'Vui lòng nhập mật khẩu!' },
+            { required: true, message: 'Vui lòng nhập mật khẩu' },
             { min: 8, message: 'Mật khẩu tối thiểu 8 ký tự' },
             {
               pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/,
@@ -139,7 +182,7 @@ function Register({ onSwitchToLogin }) {
           name="confirmPassword"
           dependencies={['password']}
           rules={[
-            { required: true, message: 'Vui lòng xác nhận mật khẩu!' },
+            { required: true, message: 'Vui lòng xác nhận mật khẩu' },
             ({ getFieldValue }) => ({
               validator(_, value) {
                 if (!value || getFieldValue('password') === value) {
@@ -170,15 +213,12 @@ function Register({ onSwitchToLogin }) {
             }
           />
         </Form.Item>
-        <div className="mb-3 flex w-full max-w-[300px] justify-start">
-          <ReCAPTCHA sitekey={recaptchaSiteKey} onChange={onCaptchaChange} />
-        </div>
 
         <Button
           type="primary"
           htmlType="submit"
-          loading={loading}
-          className="w-full flex justify-center items-center !h-12 !text-lg !font-semibold !border-0 !rounded-lg"
+          loading={isPending}
+          className="w-full mt-5 flex justify-center items-center !h-12 !text-lg !font-semibold !border-0 !rounded-lg"
           size="large"
         >
           Đăng ký
