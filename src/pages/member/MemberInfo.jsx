@@ -1,10 +1,11 @@
+import { Button, DatePicker, Form, Input, message } from 'antd';
+import dayjs from 'dayjs';
 import { useState } from 'react';
-import { Form, Input, Button, message, Card, Row, Col } from 'antd';
 
 const initialUser = {
   email: 'user@email.com',
   name: 'Nguyễn Văn A',
-  birthday: '01/01/1990',
+  birthday: '',
   address: 'Hà Nội',
   phone: '0123456789',
 };
@@ -24,91 +25,86 @@ const MemberInfo = () => {
   };
 
   return (
-    <Card
-      title={
-        <span className="text-xl font-bold text-blue-700">
-          Thông tin cơ bản
-        </span>
-      }
-      bordered={false}
-      className="shadow-xl rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50"
-      style={{ maxWidth: 600, margin: '0 auto' }}
-    >
+    <div className="space-y-6">
+      <div className="border-b pb-4">
+        <h2 className="text-2xl font-bold text-gray-800">Thông tin cơ bản</h2>
+        <p className="text-gray-600 mt-2">
+          Quản lý thông tin tài khoản của bạn
+        </p>
+      </div>
+
       <Form
         form={form}
         layout="vertical"
         initialValues={user}
         onFinish={onFinish}
-        size="large"
-        className="pt-2"
+        className="grid grid-cols-1 md:grid-cols-2 gap-6"
       >
-        <Row gutter={16}>
-          <Col xs={24} sm={12}>
-            <Form.Item
-              label="Email"
-              name="email"
-              rules={[
-                { required: true, message: 'Vui lòng nhập email!' },
-                { type: 'email', message: 'Email không hợp lệ!' },
-              ]}
-            >
-              <Input disabled className="bg-gray-100" />
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={12}>
-            <Form.Item
-              label="Họ và tên"
-              name="name"
-              rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }]}
-            >
-              <Input placeholder="Nhập họ và tên" />
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={12}>
-            <Form.Item
-              label="Ngày sinh"
-              name="birthday"
-              rules={[{ required: true, message: 'Vui lòng nhập ngày sinh!' }]}
-            >
-              <Input placeholder="dd/mm/yyyy" />
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={12}>
-            <Form.Item
-              label="Số điện thoại"
-              name="phone"
-              rules={[
-                { required: true, message: 'Vui lòng nhập số điện thoại!' },
-              ]}
-            >
-              <Input placeholder="Nhập số điện thoại" />
-            </Form.Item>
-          </Col>
-          <Col xs={24}>
-            <Form.Item
-              label="Địa chỉ"
-              name="address"
-              rules={[{ required: true, message: 'Vui lòng nhập địa chỉ!' }]}
-            >
-              <Input placeholder="Nhập địa chỉ" />
-            </Form.Item>
-          </Col>
-        </Row>
-        <Form.Item className="text-center mt-6">
+        <div className="space-y-4">
+          <Form.Item
+            label="Họ và tên"
+            name="name"
+            rules={[{ required: true, message: 'Vui lòng nhập họ và tên' }]}
+          >
+            <Input placeholder="Nhập họ và tên" />
+          </Form.Item>
+          <Form.Item
+            label="Email"
+            name="email"
+            rules={[
+              {
+                required: true,
+                type: 'email',
+                message: 'Vui lòng nhập email hợp lệ',
+              },
+            ]}
+          >
+            <Input placeholder="example@email.com" />
+          </Form.Item>
+          <Form.Item
+            label="Số điện thoại"
+            name="phone"
+            rules={[{ required: true, message: 'Vui lòng nhập số điện thoại' }]}
+          >
+            <Input placeholder="0123456789" />
+          </Form.Item>
+        </div>
+        <div className="space-y-4">
+          <Form.Item
+            label="Địa chỉ"
+            name="address"
+            rules={[{ required: true, message: 'Vui lòng nhập địa chỉ' }]}
+          >
+            <Input.TextArea rows={3} placeholder="Nhập địa chỉ" />
+          </Form.Item>
+          <Form.Item
+            name="birthday"
+            rules={[{ required: true, message: 'Vui lòng chọn ngày sinh' }]}
+            className="w-[40%] [&_.ant-form-item-explain]:text-left"
+          >
+            <DatePicker
+              placeholder="Ngày sinh"
+              format="YYYY/MM/DD"
+              size="large"
+              className="w-full !py-3 !px-4 !text-base !rounded-lg"
+              disabledDate={(current) => {
+                return current && current >= dayjs().startOf('day');
+              }}
+            />
+          </Form.Item>
+        </div>
+        <div className="md:col-span-2 pt-4">
           <Button
             type="primary"
             htmlType="submit"
             loading={loading}
-            className="px-8 py-2 rounded-xl text-base font-semibold bg-gradient-to-r from-blue-500 to-indigo-600 border-0"
-            style={{
-              boxShadow: '0 4px 16px 0 rgba(56, 189, 248, 0.10)',
-            }}
+            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl"
           >
-            Lưu thay đổi
+            Cập nhật thông tin
           </Button>
-        </Form.Item>
+        </div>
       </Form>
-    </Card>
+    </div>
   );
 };
 

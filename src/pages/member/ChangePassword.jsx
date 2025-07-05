@@ -16,88 +16,71 @@ const ChangePassword = () => {
   };
 
   return (
-    <Card
-      title={
-        <span className="text-xl font-bold text-blue-700">Đổi mật khẩu</span>
-      }
-      bordered={false}
-      className="shadow-xl rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50"
-      style={{ maxWidth: 480, margin: '0 auto' }}
-    >
+    <div className="space-y-6">
+      <div className="border-b pb-4">
+        <h2 className="text-2xl font-bold text-gray-800">Đổi mật khẩu</h2>
+        <p className="text-gray-600 mt-2">
+          Cập nhật mật khẩu để bảo mật tài khoản
+        </p>
+      </div>
+
       <Form
         form={form}
         layout="vertical"
         onFinish={onFinish}
-        size="large"
-        className="pt-2"
+        className="max-w-md space-y-4"
       >
         <Form.Item
-          label="Mật khẩu cũ"
-          name="oldPassword"
-          rules={[{ required: true, message: 'Vui lòng nhập mật khẩu cũ!' }]}
+          label="Mật khẩu hiện tại"
+          name="currentPassword"
+          rules={[
+            { required: true, message: 'Vui lòng nhập mật khẩu hiện tại' },
+          ]}
         >
-          <Input.Password
-            placeholder="Nhập mật khẩu cũ"
-            autoComplete="current-password"
-          />
+          <Input.Password placeholder="Nhập mật khẩu hiện tại" />
         </Form.Item>
         <Form.Item
           label="Mật khẩu mới"
           name="newPassword"
           rules={[
-            { required: true, message: 'Vui lòng nhập mật khẩu mới!' },
-            { min: 8, message: 'Mật khẩu phải có ít nhất 8 ký tự!' },
+            { required: true, message: 'Vui lòng nhập mật khẩu mới' },
+            { min: 8, message: 'Mật khẩu phải có ít nhất 8 ký tự' },
           ]}
         >
-          <Input.Password
-            placeholder="Nhập mật khẩu mới"
-            autoComplete="new-password"
-          />
+          <Input.Password placeholder="Nhập mật khẩu mới" />
         </Form.Item>
         <Form.Item
-          label="Nhập lại mật khẩu mới"
+          label="Xác nhận mật khẩu mới"
           name="confirmPassword"
           dependencies={['newPassword']}
           rules={[
-            { required: true, message: 'Vui lòng nhập lại mật khẩu mới!' },
+            { required: true, message: 'Vui lòng xác nhận mật khẩu mới' },
             ({ getFieldValue }) => ({
               validator(_, value) {
                 if (!value || getFieldValue('newPassword') === value) {
                   return Promise.resolve();
                 }
                 return Promise.reject(
-                  new Error('Mật khẩu nhập lại không khớp!'),
+                  new Error('Mật khẩu xác nhận không khớp!'),
                 );
               },
             }),
           ]}
         >
-          <Input.Password
-            placeholder="Nhập lại mật khẩu mới"
-            autoComplete="new-password"
-          />
+          <Input.Password placeholder="Xác nhận mật khẩu mới" />
         </Form.Item>
-        <Form.Item className="text-center mt-6">
+        <div className="pt-4">
           <Button
             type="primary"
             htmlType="submit"
             loading={loading}
-            className="px-8 py-2 rounded-xl text-base font-semibold border-0"
-            style={{
-              boxShadow: '0 4px 16px 0 rgba(56, 189, 248, 0.10)',
-            }}
+            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl"
           >
             Đổi mật khẩu
           </Button>
-        </Form.Item>
+        </div>
       </Form>
-      <div className="mt-8 p-4 bg-amber-50 rounded-xl border border-amber-200 shadow-sm">
-        <p className="text-amber-800 text-sm">
-          <strong>Lưu ý:</strong> Mật khẩu mới phải có ít nhất 8 ký tự, bao gồm
-          chữ hoa, chữ thường và số.
-        </p>
-      </div>
-    </Card>
+    </div>
   );
 };
 

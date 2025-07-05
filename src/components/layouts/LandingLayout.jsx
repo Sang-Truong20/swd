@@ -3,15 +3,14 @@ import Footer from './Footer';
 import Navbar from './Navbar';
 
 const LandingLayout = ({ children }) => {
-  // const isAuthenticated = localStorage.getItem('isAuthenticated');
+  const isAuthenticated = localStorage.getItem('isAuthenticated');
 
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
       <main className="flex-1">{children}</main>
       <Footer />
-      <ChatWidget />
-      {/* {isAuthenticated && <ChatWidget />} */}
+      {isAuthenticated && <ChatWidget />}
     </div>
   );
 };
