@@ -7,9 +7,13 @@ import {
 } from '@ant-design/icons';
 import { useMutation } from '@tanstack/react-query';
 import { Button, Checkbox, Form, Input } from 'antd';
-import { useState } from 'react';
+import Cookies from 'js-cookie';
+import { jwtDecode } from 'jwt-decode';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { PATH_NAME } from '../../../constants';
 import { login } from '../../../services/auth';
+import { notify } from '../../../utils';
 
 function Login({ onSwitchToLogin }) {
   const [form] = Form.useForm();
@@ -18,22 +22,72 @@ function Login({ onSwitchToLogin }) {
 
   const togglePassword = () => setShowPassword((prev) => !prev);
 
+  useEffect(() => {
+    const savedCredentials = localStorage.getItem('rememberedCredentials');
+    if (savedCredentials) {
+      try {
+        const { email, password } = JSON.parse(savedCredentials);
+        form.setFieldsValue({
+          email,
+          password,
+          rememberMe: true,
+        });
+        // eslint-disable-next-line no-unused-vars
+      } catch (error) {
+        localStorage.removeItem('rememberedCredentials');
+      }
+    }
+  }, [form]);
+
   const { mutate: loginMutate, isPending } = useMutation({
     mutationFn: login,
-    onSuccess: (data) => {
-      navigate('/');
+    onSuccess: (res) => {
+      notify('success', { description: 'Đăng nhập thành công' });
+
+      const accessToken = res?.data?.accessToken;
+      const refreshToken = res?.data?.refreshToken;
+
+      if (accessToken && refreshToken) {
+        Cookies.set('accessToken', accessToken);
+        Cookies.set('refreshToken', refreshToken);
+        const decoded = jwtDecode(accessToken);
+        const role = decoded['role'];
+        if (role === 'ADMIN') {
+          navigate(PATH_NAME.ADMIN);
+        } else {
+          navigate(PATH_NAME.HOME);
+        }
+        localStorage.setItem('isAuthenticated', true);
+      }
     },
     onError: (err) => {
-      console.error('err', err);
+      if (err && err.status === 401) {
+        notify('error', { description: 'Thông tin đăng nhập không hợp lệ' });
+        return;
+      }
+      notify('error', { description: 'Lỗi hệ thống' });
     },
   });
 
   const handleSubmit = async (values) => {
+    if (values.rememberMe) {
+      const credentialsToSave = {
+        email: values.email,
+        password: values.password,
+      };
+      localStorage.setItem(
+        'rememberedCredentials',
+        JSON.stringify(credentialsToSave),
+      );
+    } else {
+      localStorage.removeItem('rememberedCredentials');
+    }
+
     loginMutate(values);
   };
 
   return (
-    <div className="bg-white relative rounded-2xl shadow-xl p-8 md:p-10">
+    <div className="bg-white relative rounded-2xl shadow-xl p-5 md:p-8">
       <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-20 h-1 bg-blue-600 rounded-b-full" />
       <div className="text-center mb-8">
         <div className="w-20 h-20 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
@@ -60,11 +114,11 @@ function Login({ onSwitchToLogin }) {
         requiredMark={false}
       >
         <Form.Item
-          name="usernameOrEmail"
+          name="email"
           rules={[
             {
               required: true,
-              message: 'Vui lòng nhập email hoặc số điện thoại!',
+              message: 'Vui lòng nhập email hoặc số điện thoại',
             },
             { min: 8, message: 'Tối thiểu 8 ký tự' },
           ]}
@@ -81,7 +135,7 @@ function Login({ onSwitchToLogin }) {
         <Form.Item
           name="password"
           rules={[
-            { required: true, message: 'Vui lòng nhập mật khẩu!' },
+            { required: true, message: 'Vui lòng nhập mật khẩu' },
             { min: 8, message: 'Mật khẩu tối thiểu 8 ký tự' },
           ]}
           className="mb-2"
@@ -134,7 +188,6 @@ function Login({ onSwitchToLogin }) {
               src="https://freesvg.org/img/1534129544.png"
               width={30}
               height={30}
-              quality={100}
               alt=""
               className="mr-2"
             />

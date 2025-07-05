@@ -113,9 +113,8 @@ const ChatBot = ({ onClose }) => {
 
   useEffect(() => {
     if (listMessage.length > 0) {
-      const newMessages = transformedMessages();
+      const newMessages = transformedMessages;
 
-      // So sánh để tránh setMessages gây loop
       const isDifferent =
         newMessages.length !== messages.length ||
         newMessages.some((msg, i) => msg.timestamp !== messages[i]?.timestamp);

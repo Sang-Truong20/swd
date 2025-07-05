@@ -1,29 +1,35 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { PATH_NAME } from '../../constants';
+import { useLogout } from '../../hooks/useLogout';
 import { useNotificationStore } from '../../store/useNotificationStore';
 import NotificationBell from '../NotificationBell';
 import UserMenu from '../UserMenu';
 import NavElements from './NavElements';
+import { FaBalanceScale } from 'react-icons/fa';
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [user, setUser] = useState(null);
   const { count: notificationCount } = useNotificationStore();
+  const isAuthenticated = localStorage.getItem('isAuthenticated');
+  const navigate = useNavigate();
+  const user = {
+    name: 'Sang Truong',
+    email: 'sangtpse171049@fpt.edu.vn',
+    avatar: null,
+  };
+  const logout = useLogout();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
   const handleLogin = () => {
-    setUser({
-      name: 'Sang Truong',
-      email: 'sangtpse171049@fpt.edu.vn',
-      avatar: null,
-    });
+    navigate(PATH_NAME.AUTH);
   };
 
   const handleLogout = () => {
-    setUser(null);
+    logout();
   };
 
   return (
@@ -32,8 +38,8 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-[70px]">
           <div className="flex items-center">
             <Link to="/" className="group flex items-center space-x-2">
-              <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-2xl transform hover:scale-105 transition-all duration-300">
-                <span className="text-white font-bold text-xl">SL</span>
+              <div className="w-14 h-14 bg-[#5b7aee] backdrop-blur rounded-2xl flex items-center justify-center">
+                <FaBalanceScale className="text-3xl !text-white" />
               </div>
               <div className="hidden lg:block">
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent">
@@ -50,7 +56,7 @@ const Navbar = () => {
             </nav>
 
             <div className="flex items-center space-x-3">
-              {user ? (
+              {isAuthenticated ? (
                 <>
                   <NotificationBell count={notificationCount} />
                   <div className="h-8 w-px bg-gray-300" />
@@ -68,7 +74,7 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center space-x-2 lg:hidden">
-            {user ? (
+            {isAuthenticated ? (
               <>
                 <NotificationBell count={notificationCount} />
                 <UserMenu user={user} onLogout={handleLogout} mobile />
