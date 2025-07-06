@@ -1,48 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  FaBalanceScale,
-  FaGavel,
-  FaLightbulb,
-  FaPaperPlane,
-  FaQuestionCircle,
-  FaTimes,
-  FaUser,
-} from 'react-icons/fa';
+import { FaBalanceScale, FaPaperPlane, FaTimes, FaUser } from 'react-icons/fa';
 import { chatWithGemini, getChatHistory } from '../../services/chat';
-import { formatDateChatBot } from '../../utils/index';
-
-const quickOptions = [
-  {
-    icon: FaGavel,
-    text: 'Luật giao thông',
-    query: 'Tôi cần tư vấn về luật giao thông',
-    color: 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200',
-  },
-  {
-    icon: FaBalanceScale,
-    text: 'Luật lao động',
-    query: 'Tôi cần tư vấn về luật lao động',
-    color: 'bg-green-50 hover:bg-green-100 text-green-700 border-green-200',
-  },
-  {
-    icon: FaLightbulb,
-    text: 'Luật dân sự',
-    query: 'Tôi cần tư vấn về luật dân sự',
-    color: 'bg-purple-50 hover:bg-purple-100 text-purple-700 border-purple-200',
-  },
-  {
-    icon: FaQuestionCircle,
-    text: 'Luật hình sự',
-    query: 'Tôi cần tư vấn về luật hình sự',
-    color: 'bg-orange-50 hover:bg-orange-100 text-orange-700 border-orange-200',
-  },
-];
-
-const getDateKey = (dateString) => {
-  const date = new Date(dateString);
-  return date.toDateString();
-};
+import { formatDateChatBot, getDateKey } from '../../utils/index';
+import { quickOptions } from './constants/index';
 
 const ChatBot = ({ onClose }) => {
   const [messages, setMessages] = useState([]);
@@ -50,6 +11,7 @@ const ChatBot = ({ onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showAnimation, setShowAnimation] = useState(true);
   const [isTyping, setIsTyping] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   const chatContainerRef = useRef(null);
   const textareaRef = useRef(null);
 
@@ -111,6 +73,27 @@ const ChatBot = ({ onClose }) => {
     return groupedMessages;
   }, [listMessage]);
 
+  const focusTextarea = () => {
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  };
+
+  const scrollToBottom = (force = false) => {
+    if (chatContainerRef.current) {
+      const scrollHeight = chatContainerRef.current.scrollHeight;
+      const clientHeight = chatContainerRef.current.clientHeight;
+      const scrollTop = chatContainerRef.current.scrollTop;
+
+      if (force || scrollHeight - scrollTop - clientHeight < 100) {
+        chatContainerRef.current.scrollTo({
+          top: scrollHeight,
+          behavior: 'smooth',
+        });
+      }
+    }
+  };
+
   useEffect(() => {
     if (listMessage.length > 0) {
       const newMessages = transformedMessages;
@@ -121,37 +104,47 @@ const ChatBot = ({ onClose }) => {
 
       if (isDifferent) {
         setMessages(newMessages);
+        if (!isInitialized) {
+          setIsInitialized(true);
+          setTimeout(() => {
+            scrollToBottom(true);
+            focusTextarea();
+          }, 100);
+        }
       }
     } else if (messages.length === 0) {
-      setMessages([
-        {
-          type: 'message',
-          sender: 'other',
-          text: 'Xin chào! Tôi là SmartLaw AI - Trợ lý tư vấn pháp luật thông minh. Tôi có thể giúp bạn với các vấn đề về luật giao thông, dân sự, hình sự, lao động và nhiều lĩnh vực khác. Bạn cần tư vấn về vấn đề gì?',
-          time: new Date().toLocaleTimeString('vi-VN', {
-            hour: '2-digit',
-            minute: '2-digit',
-          }),
-          timestamp: new Date().toISOString(),
-        },
-      ]);
-    }
-  }, [listMessage]);
+      const initialMessage = {
+        type: 'message',
+        sender: 'other',
+        text: 'Xin chào! Tôi là SmartLaw AI - Trợ lý tư vấn pháp luật thông minh. Tôi có thể giúp bạn với các vấn đề về luật giao thông, dân sự, hình sự, lao động và nhiều lĩnh vực khác. Bạn cần tư vấn về vấn đề gì?',
+        time: new Date().toLocaleTimeString('vi-VN', {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+        timestamp: new Date().toISOString(),
+      };
 
-  const scrollToBottom = () => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop =
-        chatContainerRef.current.scrollHeight;
+      setMessages([initialMessage]);
+      setIsInitialized(true);
+      setTimeout(() => {
+        scrollToBottom(true);
+        focusTextarea();
+      }, 100);
     }
-  };
+  }, [listMessage, transformedMessages]);
 
   useEffect(() => {
-    setTimeout(scrollToBottom, 50);
-  }, [messages]);
+    if (isInitialized && messages.length > 0) {
+      setTimeout(() => scrollToBottom(true), 50);
+    }
+  }, [messages, isInitialized]);
 
   useEffect(() => {
     setShowAnimation(true);
-    const timer = setTimeout(() => setShowAnimation(false), 600);
+    const timer = setTimeout(() => {
+      setShowAnimation(false);
+      focusTextarea();
+    }, 600);
     return () => clearTimeout(timer);
   }, []);
 
@@ -200,11 +193,15 @@ const ChatBot = ({ onClose }) => {
     setIsLoading(true);
     setIsTyping(true);
 
+    setTimeout(() => {
+      focusTextarea();
+    }, 10);
+
     try {
-      const res = await chatWithGemini(
-        message.trim(),
-        '2ca20ee0-88b9-4aac-b7a6-21088201b8df',
-      );
+      const res = await chatWithGemini(message.trim(), userId);
+
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+
       const answer =
         res?.data?.answer || res?.data || 'Không nhận được phản hồi từ server.';
 
@@ -222,6 +219,10 @@ const ChatBot = ({ onClose }) => {
           timestamp: new Date().toISOString(),
         },
       ]);
+
+      setTimeout(() => {
+        focusTextarea();
+      }, 100);
     } catch {
       setIsTyping(false);
       setMessages((prev) => [
@@ -237,11 +238,12 @@ const ChatBot = ({ onClose }) => {
           timestamp: new Date().toISOString(),
         },
       ]);
+
+      setTimeout(() => {
+        focusTextarea();
+      }, 100);
     } finally {
       setIsLoading(false);
-      if (textareaRef.current) {
-        textareaRef.current.focus();
-      }
     }
   };
 
@@ -251,9 +253,14 @@ const ChatBot = ({ onClose }) => {
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
-      ``;
       e.preventDefault();
       handleSend();
+    }
+  };
+
+  const handleChatContainerClick = () => {
+    if (!isLoading) {
+      focusTextarea();
     }
   };
 
@@ -301,11 +308,12 @@ const ChatBot = ({ onClose }) => {
 
         <div
           ref={chatContainerRef}
-          className="flex-1 overflow-y-auto px-6 mb-3 space-y-4 bg-gradient-to-br from-gray-50 via-white to-indigo-50/20"
+          className="flex-1 overflow-y-auto px-6 pb-3 space-y-4 bg-gradient-to-br from-gray-50 via-white to-indigo-50/20 cursor-text"
           style={{
             scrollbarWidth: 'thin',
             scrollbarColor: '#e5e7eb transparent',
           }}
+          onClick={handleChatContainerClick}
         >
           {showQuickOptions && (
             <div className="mb-8 animate-fade-in">
@@ -384,7 +392,7 @@ const ChatBot = ({ onClose }) => {
 
           {isTyping && (
             <div className="flex items-start gap-3 animate-fade-in">
-              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-md">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center shadow-md">
                 <FaBalanceScale className="text-white text-sm" />
               </div>
               <div className="bg-white border border-gray-200 rounded-2xl rounded-tl-md px-4 py-3 shadow-sm">
@@ -416,6 +424,7 @@ const ChatBot = ({ onClose }) => {
               rows="1"
               style={{ minHeight: '24px', maxHeight: '120px' }}
               disabled={isLoading}
+              autoFocus
             />
 
             <button

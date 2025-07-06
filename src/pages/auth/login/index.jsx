@@ -105,6 +105,15 @@ function Login({ onSwitchToLogin }) {
         >
           Quay về trang chủ
         </p>
+        <p
+          onClick={() => {
+            localStorage.setItem('isAuthenticated', true);
+            navigate('/');
+          }}
+          className="mt-2 text-blue-600 hover:text-blue-800 cursor-pointer font-medium transition-colors"
+        >
+          Đăng nhập với tư cách khách
+        </p>
       </div>
       <Form
         form={form}

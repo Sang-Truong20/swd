@@ -17,6 +17,7 @@ const PackageManager = lazy(() => import('../pages/member/PackageManager'));
 const AdminHome = lazy(() => import('../pages/admin'));
 const Post = lazy(() => import('../pages/post'));
 const PostDetail = lazy(() => import('../pages/post/detail'));
+const PaymentPage = lazy(() => import('../pages/payment'));
 
 const withSuspense = (Component) => (
   <Suspense
@@ -70,6 +71,10 @@ const router = createBrowserRouter([
                 element: withSuspense(PackageManager),
               },
             ],
+          },
+          {
+            path: PATH_NAME.PAYMENT,
+            element: withSuspense(PaymentPage),
           },
         ],
       },

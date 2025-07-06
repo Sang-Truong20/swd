@@ -12,6 +12,7 @@ const PATH_NAME = {
   PACKAGE_MAMANGEMENT: '/member/package',
   CHANGE_PASSWORD: '/member/change-password',
   MEMBER_INFO: '/member/info',
+  PAYMENT: '/vnpay/return',
 };
 
 const NAV_ELEMENTS = [

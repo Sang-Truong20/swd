@@ -8,4 +8,8 @@ const createPackageAfterPayment = (payload) => {
   return axiosClient.post(`/command/package`, payload);
 };
 
-export { createPackageAfterPayment, payment };
+const getAllPackage = () => {
+  axiosClient.get('/query/package/all');
+};
+
+export { createPackageAfterPayment, getAllPackage, payment };
