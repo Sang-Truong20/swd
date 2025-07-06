@@ -4,4 +4,8 @@ const createUser = (payload) => {
   return axiosClient.post(`/command/user`, payload);
 };
 
-export { createUser };
+const updateUserInfo = ({ payload, userId }) => {
+  return axiosClient.post(`/command/user/${userId}`, payload);
+};
+
+export { createUser, updateUserInfo };

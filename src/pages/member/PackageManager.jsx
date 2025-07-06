@@ -1,10 +1,24 @@
+import { useQuery } from '@tanstack/react-query';
 import { Modal } from 'antd';
 import { Calendar, Clock, CreditCard, Package } from 'lucide-react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { getUserPackageHistory } from '../../services/user-package';
 
 const PackageManager = () => {
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const userId = useMemo(() => '12cae9be-2b04-4144-a836-468d1449399a', []);
+
+  const { data: packageHistory } = useQuery({
+    queryKey: ['user-package', userId],
+    queryFn: () => getUserPackageHistory(userId),
+    enabled: !!userId,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    retry: 1,
+  });
+
+  console.log('check packageHistory', packageHistory);
 
   const packagesData = [
     {
