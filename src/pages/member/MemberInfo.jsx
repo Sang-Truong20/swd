@@ -5,10 +5,10 @@ import UploadImage from '../../components/UploadImage';
 
 const initialUser = {
   username: 'admin',
-  email: 'user@email.com',
-  name: 'Nguyễn Văn A',
+  email: 'sangdev@gmail.com',
+  name: 'Trương Phước Sang',
   birthday: '',
-  address: 'Hà Nội',
+  address: 'Hồ Chí Minh',
   phone: '0123456789',
 };
 
