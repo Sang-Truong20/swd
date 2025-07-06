@@ -1,7 +1,7 @@
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import { Image, Upload, message } from 'antd';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { storage } from '../configs/firebase';
 
 const getBase64 = (file) =>
@@ -13,12 +13,18 @@ const getBase64 = (file) =>
   });
 
 const UploadImage = (props) => {
-  const { onFileChange, initialImage, titleButton } = props;
+  const { onFileChange, initialImage, titleButton, onUploadingChange } = props;
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState('');
   const [file, setFile] = useState(null);
   const [fileChange, setFileChange] = useState('');
   const [uploading, setUploading] = useState(false);
+
+  useEffect(() => {
+    if (onUploadingChange) {
+      onUploadingChange(uploading);
+    }
+  }, [uploading, onUploadingChange]);
 
   useEffect(() => {
     onFileChange(fileChange);
@@ -138,4 +144,4 @@ const UploadImage = (props) => {
   );
 };
 
-export default UploadImage;
+export default memo(UploadImage);

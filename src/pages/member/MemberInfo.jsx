@@ -1,7 +1,10 @@
-import { Button, DatePicker, Form, Input, message } from 'antd';
+import { useMutation } from '@tanstack/react-query';
+import { Button, DatePicker, Form, Input } from 'antd';
 import dayjs from 'dayjs';
-import { useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import UploadImage from '../../components/UploadImage';
+import { updateUserInfo } from '../../services/user';
+import { notify } from '../../utils';
 
 const initialUser = {
   username: 'admin',
@@ -10,25 +13,48 @@ const initialUser = {
   birthday: '',
   address: 'Hồ Chí Minh',
   phone: '0123456789',
+  avatarUrlText: '',
 };
 
 const MemberInfo = () => {
   const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
-  const [user, setUser] = useState(initialUser);
+  const [user] = useState(initialUser);
+  const userId = useMemo(() => '12cae9be-2b04-4144-a836-468d1449399a', []);
+  const [fileChange, setFileChange] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+
+  useEffect(() => {
+    if (initialUser) {
+      form.setFieldsValue({
+        ...initialUser,
+        avatarUrlText: fileChange,
+      });
+    }
+  }, [initialUser, fileChange, form]);
+
+  const { mutate: mutateUpdateUserInfo, isPending } = useMutation({
+    mutationFn: updateUserInfo,
+    onSuccess: () => {
+      notify('success', {
+        description: 'Cập nhật thông tin người dùng thành công',
+      });
+    },
+    onError: (err) => {
+      notify('error', { description: 'Lỗi hệ thống' });
+    },
+  });
 
   const onFinish = (values) => {
-    setLoading(true);
-    setTimeout(() => {
-      setUser(values);
-      setLoading(false);
-      message.success('Cập nhật thông tin thành công!');
-    }, 1200);
+    const payload = {
+      ...values,
+      birthday: values.birthday.format('YYYY-MM-DD'),
+    };
+    mutateUpdateUserInfo({ payload, userId });
   };
 
-  const onFileChange = () => {
-    console.log('123');
-  };
+  const handleFileChange = useCallback((newFileChange) => {
+    setFileChange(newFileChange);
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -112,7 +138,7 @@ const MemberInfo = () => {
             >
               <DatePicker
                 placeholder="Chọn ngày sinh"
-                format="DD/MM/YYYY"
+                format="YYYY/MM/DD"
                 size="large"
                 className="w-full !py-3 !px-4 !text-base !rounded-lg !border-gray-300 focus:!border-blue-500"
                 disabledDate={(current) => {
@@ -133,23 +159,27 @@ const MemberInfo = () => {
               />
             </Form.Item>
 
-            <div className="mt-6">
-              <label className="block text-sm font-normal text-gray-700 mb-2">
-                Ảnh đại diện
-              </label>
-              <UploadImage
-                onFileChange={onFileChange}
-                initialImage={''}
-                titleButton="Tải lên ảnh"
-              />
-            </div>
+            <Form.Item
+              name="avatarUrlText"
+              // rules={[{ required: true, message: 'Vui lòng chọn hình ảnh' }]}
+              className="flex w-full items-center justify-center"
+            >
+              <div className="flex w-full flex-col items-center">
+                <UploadImage
+                  titleButton="Thêm ảnh"
+                  initialImage={''}
+                  onFileChange={handleFileChange}
+                  onUploadingChange={(status) => setIsUploading(status)}
+                />
+              </div>
+            </Form.Item>
           </div>
         </div>
         <div className="flex justify-start pt-8 border-t border-gray-200 mt-8">
           <Button
             type="primary"
             htmlType="submit"
-            loading={loading}
+            loading={isPending || isUploading}
             size="large"
             className="!h-12 !px-8 !text-base !font-semibold !rounded-lg !bg-blue-600 hover:!bg-blue-700 !border-0 !shadow-md hover:!shadow-lg transition-all duration-200"
           >
