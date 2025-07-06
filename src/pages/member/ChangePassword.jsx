@@ -1,4 +1,4 @@
-import { Form, Input, Button, Card, message } from 'antd';
+import { Button, Form, Input, message } from 'antd';
 import { useState } from 'react';
 
 const ChangePassword = () => {
@@ -17,7 +17,7 @@ const ChangePassword = () => {
 
   return (
     <div className="space-y-6">
-      <div className="border-b pb-4">
+      <div className="border-b border-gray-200 pb-4">
         <h2 className="text-2xl font-bold text-gray-800">Đổi mật khẩu</h2>
         <p className="text-gray-600 mt-2">
           Cập nhật mật khẩu để bảo mật tài khoản
@@ -37,7 +37,10 @@ const ChangePassword = () => {
             { required: true, message: 'Vui lòng nhập mật khẩu hiện tại' },
           ]}
         >
-          <Input.Password placeholder="Nhập mật khẩu hiện tại" />
+          <Input.Password
+            className="!py-3 !px-4 !text-base !rounded-lg"
+            placeholder="Nhập mật khẩu hiện tại"
+          />
         </Form.Item>
         <Form.Item
           label="Mật khẩu mới"
@@ -47,7 +50,10 @@ const ChangePassword = () => {
             { min: 8, message: 'Mật khẩu phải có ít nhất 8 ký tự' },
           ]}
         >
-          <Input.Password placeholder="Nhập mật khẩu mới" />
+          <Input.Password
+            className="!py-3 !px-4 !text-base !rounded-lg"
+            placeholder="Nhập mật khẩu mới"
+          />
         </Form.Item>
         <Form.Item
           label="Xác nhận mật khẩu mới"
@@ -67,14 +73,18 @@ const ChangePassword = () => {
             }),
           ]}
         >
-          <Input.Password placeholder="Xác nhận mật khẩu mới" />
+          <Input.Password
+            className="!py-3 !px-4 !text-base !rounded-lg"
+            placeholder="Xác nhận mật khẩu mới"
+          />
         </Form.Item>
-        <div className="pt-4">
+        <div className="flex justify-start pt-8 border-t border-gray-200 mt-8">
           <Button
             type="primary"
             htmlType="submit"
             loading={loading}
-            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+            size="large"
+            className="!h-12 !px-8 !text-base !font-semibold !rounded-lg !bg-blue-600 hover:!bg-blue-700 !border-0 !shadow-md hover:!shadow-lg transition-all duration-200"
           >
             Đổi mật khẩu
           </Button>

@@ -74,7 +74,7 @@ const Packages = () => {
           'Báo cáo chi tiết và phân tích',
           `Giới hạn ${item.description} mỗi ngày`,
         ],
-        buttonText: '🚀 Nâng cấp ngay',
+        buttonText: '🚀 Trải nghiệm ngay',
         isPopular: true,
       },
       2: {
@@ -88,7 +88,7 @@ const Packages = () => {
           'Tích hợp API không giới hạn',
           `Giới hạn ${item.description} mỗi ngày`,
         ],
-        buttonText: '🚀 Nâng cấp Premium',
+        buttonText: '🚀 Trải nghiệm ngay',
         isPopular: false,
       },
     };
@@ -160,7 +160,7 @@ const Packages = () => {
           {packagesData.map((pkg) => (
             <div
               key={pkg.id}
-              className={`relative group flex flex-col rounded-3xl p-8 transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 ${
+              className={`relative group flex flex-col rounded-3xl p-8 transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 will-change-transform ${
                 pkg.isPopular
                   ? 'bg-gradient-to-br from-blue-600 via-blue-700 to-purple-700 text-white shadow-2xl shadow-blue-500/30 border-2 border-blue-400'
                   : 'bg-white/90 backdrop-blur-sm text-gray-800 shadow-xl shadow-gray-200/50 border border-gray-200/50 hover:shadow-2xl hover:shadow-blue-200/30'
@@ -227,10 +227,8 @@ const Packages = () => {
                 } ${isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 <span className="relative z-10 flex items-center justify-center gap-2">
-                  {isPending ? 'Đang xử lý...' : pkg.buttonText}
-                  {!isPending && (
-                    <ArrowRightOutlined className="transition-transform duration-300 group-hover:translate-x-1" />
-                  )}
+                  {pkg.buttonText}
+                  <ArrowRightOutlined className="transition-transform duration-300 group-hover:translate-x-1" />
                 </span>
 
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>

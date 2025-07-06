@@ -109,7 +109,7 @@ const PackageManager = () => {
 
   return (
     <div className="space-y-6">
-      <div className="border-b pb-4">
+      <div className="border-b border-gray-200 pb-4">
         <h2 className="text-2xl font-bold text-gray-800">Quản lý Package</h2>
         <p className="text-gray-600 mt-2">Quản lý các gói dịch vụ của bạn</p>
       </div>
