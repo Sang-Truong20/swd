@@ -1,7 +1,7 @@
 import { Navigate, Outlet } from 'react-router-dom';
 
 const isAuthenticated = () => {
-  return !!localStorage.getItem('token');
+  return !!localStorage.getItem('accessToken');
 };
 
 const GuestRoute = () => {
