@@ -3,34 +3,25 @@ import { Button, DatePicker, Form, Input } from 'antd';
 import dayjs from 'dayjs';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import UploadImage from '../../components/UploadImage';
+import { useUserData } from '../../hooks/useUserData';
 import { updateUserInfo } from '../../services/user';
 import { notify } from '../../utils';
 
-const initialUser = {
-  username: 'admin',
-  email: 'sangdev@gmail.com',
-  name: 'Trương Phước Sang',
-  birthday: '',
-  address: 'Hồ Chí Minh',
-  phone: '0123456789',
-  avatarUrlText: '',
-};
-
 const MemberInfo = () => {
   const [form] = Form.useForm();
-  const [user] = useState(initialUser);
   const userId = useMemo(() => '12cae9be-2b04-4144-a836-468d1449399a', []);
   const [fileChange, setFileChange] = useState('');
   const [isUploading, setIsUploading] = useState(false);
-
+  const { userInfo } = useUserData();
+  console.log('chek userInfo', userInfo);
   useEffect(() => {
-    if (initialUser) {
+    if (userInfo) {
       form.setFieldsValue({
-        ...initialUser,
+        ...userInfo,
         avatarUrlText: fileChange,
       });
     }
-  }, [initialUser, fileChange, form]);
+  }, [userInfo, fileChange, form]);
 
   const { mutate: mutateUpdateUserInfo, isPending } = useMutation({
     mutationFn: updateUserInfo,
@@ -39,7 +30,7 @@ const MemberInfo = () => {
         description: 'Cập nhật thông tin người dùng thành công',
       });
     },
-    onError: (err) => {
+    onError: () => {
       notify('error', { description: 'Lỗi hệ thống' });
     },
   });
@@ -68,7 +59,7 @@ const MemberInfo = () => {
       <Form
         form={form}
         layout="vertical"
-        initialValues={user}
+        initialValues={userInfo}
         onFinish={onFinish}
         className="max-w-4xl mx-auto p-6 bg-white rounded-lg"
       >
@@ -76,14 +67,13 @@ const MemberInfo = () => {
           <div className="space-y-4">
             <Form.Item
               label="Tên đăng nhập"
-              name="username"
+              name="userName"
               rules={[
                 { required: true, message: 'Vui lòng nhập tên đăng nhập' },
               ]}
             >
               <Input
                 className="!py-3 !px-4 !text-base !rounded-lg !border-gray-300 focus:!border-blue-500"
-                defaultValue={'admin'}
                 placeholder="Nhập tên đăng nhập"
               />
             </Form.Item>
@@ -115,19 +105,6 @@ const MemberInfo = () => {
                 placeholder="example@email.com"
               />
             </Form.Item>
-
-            <Form.Item
-              label="Số điện thoại"
-              name="phone"
-              rules={[
-                { required: true, message: 'Vui lòng nhập số điện thoại' },
-              ]}
-            >
-              <Input
-                className="!py-3 !px-4 !text-base !rounded-lg !border-gray-300 focus:!border-blue-500"
-                placeholder="0123456789"
-              />
-            </Form.Item>
           </div>
 
           <div className="space-y-4">
@@ -146,19 +123,18 @@ const MemberInfo = () => {
                 }}
               />
             </Form.Item>
-
             <Form.Item
-              label="Địa chỉ"
-              name="address"
-              rules={[{ required: true, message: 'Vui lòng nhập địa chỉ' }]}
+              label="Số điện thoại"
+              name="phone"
+              rules={[
+                { required: true, message: 'Vui lòng nhập số điện thoại' },
+              ]}
             >
-              <Input.TextArea
-                rows={4}
-                placeholder="Nhập địa chỉ đầy đủ"
-                className="!py-3 !px-4 !text-base !rounded-lg !border-gray-300 focus:!border-blue-500 !resize-none"
+              <Input
+                className="!py-3 !px-4 !text-base !rounded-lg !border-gray-300 focus:!border-blue-500"
+                placeholder="Nhập số điện thoại"
               />
             </Form.Item>
-
             <Form.Item
               name="avatarUrlText"
               // rules={[{ required: true, message: 'Vui lòng chọn hình ảnh' }]}
@@ -167,7 +143,7 @@ const MemberInfo = () => {
               <div className="flex w-full flex-col items-center">
                 <UploadImage
                   titleButton="Thêm ảnh"
-                  initialImage={''}
+                  initialImage={userInfo.avatarUrlText ?? ''}
                   onFileChange={handleFileChange}
                   onUploadingChange={(status) => setIsUploading(status)}
                 />

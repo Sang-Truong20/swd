@@ -1,24 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import { Row, Col, Button, Input, Card, Spin } from 'antd';
 import {
-  SearchOutlined,
-  MessageOutlined,
   BookOutlined,
   FileTextOutlined,
+  MessageOutlined,
   SafetyOutlined,
+  SearchOutlined,
   TeamOutlined,
-  RightOutlined,
 } from '@ant-design/icons';
-import HeroSection from '../../components/HeroSection';
+import { Button, Col, Input, Row } from 'antd';
+import { useState } from 'react';
 import FeatureCard from '../../components/FeatureCard';
-import TestimonialsSection from '../../components/TestimonialsSection';
-import './styles.css';
+import HeroSection from '../../components/HeroSection';
 import Packages from '../../components/Packages';
+import TestimonialsSection from '../../components/TestimonialsSection';
+import { useUserData } from '../../hooks/useUserData';
+import './styles.css';
 
 const { Search } = Input;
 
 const LandingPage = () => {
   const [loading, setLoading] = useState(false);
+  const { userInfo } = useUserData();
+
+  console.log('check userInfo', userInfo);
 
   const features = [
     {

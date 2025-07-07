@@ -11,51 +11,58 @@ const PackageManager = () => {
 
   const { data: packageHistory } = useQuery({
     queryKey: ['user-package', userId],
-    queryFn: () => getUserPackageHistory(userId),
+    queryFn: () =>
+      getUserPackageHistory(userId, {
+        page: 0,
+        size: 20,
+        sort: ['createdAt,desc'],
+      }),
     enabled: !!userId,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     retry: 1,
   });
 
-  console.log('check packageHistory', packageHistory);
+  const packageHistoryList = packageHistory?.data?.content || [];
 
-  const packagesData = [
-    {
-      _id: '68669b6ef6f19157c991a3cb',
-      userPackageId: 1,
-      userId: '12cae9be-2b04-4144-a836-468d1449399a',
-      userName: null,
-      usagePackageId: '876c9616-503d-484e-8e11-33790786b3f4',
-      packageName: '123',
-      packagePrice: 100000,
-      dailyLimit: 5,
-      daysLimit: 5,
-      transactionDate: '2025-07-03T22:02:05.945',
-      transactionMethod: 'VNPAY',
-      expirationDate: '2025-07-08T22:02:05.945',
-      status: 'ACTIVE',
-      createdDate: '2025-07-03T22:02:06.145',
-      updatedDate: '2025-07-03T22:02:06.145',
-    },
-    {
-      _id: '68669b71f6f19157c991a3cc',
-      userPackageId: 2,
-      userId: '12cae9be-2b04-4144-a836-468d1449399a',
-      userName: null,
-      usagePackageId: '876c9616-503d-484e-8e11-33790786b3f4',
-      packageName: '123',
-      packagePrice: 100000,
-      dailyLimit: 5,
-      daysLimit: 5,
-      transactionDate: '2025-07-03T22:02:09.94',
-      transactionMethod: 'VNPAY',
-      expirationDate: '2025-07-08T22:02:09.94',
-      status: 'ACTIVE',
-      createdDate: '2025-07-03T22:02:09.978',
-      updatedDate: '2025-07-03T22:02:09.978',
-    },
-  ];
+  console.log('check packageHistory', packageHistoryList);
+
+  // const packagesData = [
+  //   {
+  //     _id: '68669b6ef6f19157c991a3cb',
+  //     userPackageId: 1,
+  //     userId: '12cae9be-2b04-4144-a836-468d1449399a',
+  //     userName: null,
+  //     usagePackageId: '876c9616-503d-484e-8e11-33790786b3f4',
+  //     packageName: '123',
+  //     packagePrice: 100000,
+  //     dailyLimit: 5,
+  //     daysLimit: 5,
+  //     transactionDate: '2025-07-03T22:02:05.945',
+  //     transactionMethod: 'VNPAY',
+  //     expirationDate: '2025-07-08T22:02:05.945',
+  //     status: 'ACTIVE',
+  //     createdDate: '2025-07-03T22:02:06.145',
+  //     updatedDate: '2025-07-03T22:02:06.145',
+  //   },
+  //   {
+  //     _id: '68669b71f6f19157c991a3cc',
+  //     userPackageId: 2,
+  //     userId: '12cae9be-2b04-4144-a836-468d1449399a',
+  //     userName: null,
+  //     usagePackageId: '876c9616-503d-484e-8e11-33790786b3f4',
+  //     packageName: '123',
+  //     packagePrice: 100000,
+  //     dailyLimit: 5,
+  //     daysLimit: 5,
+  //     transactionDate: '2025-07-03T22:02:09.94',
+  //     transactionMethod: 'VNPAY',
+  //     expirationDate: '2025-07-08T22:02:09.94',
+  //     status: 'ACTIVE',
+  //     createdDate: '2025-07-03T22:02:09.978',
+  //     updatedDate: '2025-07-03T22:02:09.978',
+  //   },
+  // ];
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -129,7 +136,7 @@ const PackageManager = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {packagesData.map((packageData, index) => {
+        {packageHistoryList.map((packageData, index) => {
           const daysRemaining = getDaysRemaining(packageData?.expirationDate);
           const isExpired = daysRemaining <= 0;
           const actualStatus = isExpired ? 'EXPIRED' : packageData?.status;

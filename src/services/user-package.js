@@ -11,8 +11,21 @@ const getUserPackageExpired = () => {
   return axiosClient.get(`/query/package/user/expired`);
 };
 
-const getUserPackageHistory = (userId) => {
-  return axiosClient.get(`/query/package/user/history/${userId}`);
+const getUserPackageHistory = (userId, pageable) => {
+  return axiosClient.get(`/query/package/user/history/${userId}`, {
+    params: pageable,
+    paramsSerializer: (params) => {
+      const query = new URLSearchParams();
+      for (const key in params) {
+        if (Array.isArray(params[key])) {
+          params[key].forEach((val) => query.append(key, val));
+        } else {
+          query.append(key, params[key]);
+        }
+      }
+      return query.toString();
+    },
+  });
 };
 
 const getUserPackageActive = (userId) => {

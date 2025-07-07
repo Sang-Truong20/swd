@@ -1,7 +1,8 @@
+import Cookies from 'js-cookie';
 import { Navigate, Outlet } from 'react-router-dom';
 
 const isAuthenticated = () => {
-  return !!localStorage.getItem('accessToken');
+  return !!Cookies.get('accessToken');
 };
 
 const GuestRoute = () => {

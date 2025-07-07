@@ -1,5 +1,6 @@
 import { ChevronRight, Lock, Package, User } from 'lucide-react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { useUserData } from '../../hooks/useUserData';
 
 const tabs = [
   { label: 'Thông tin cơ bản', path: 'info', icon: User },
@@ -11,6 +12,7 @@ const MemberPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const currentPath = location.pathname.split('/').pop() || 'info';
+  const { userInfo } = useUserData();
 
   const handleTabClick = (path) => {
     navigate(`/member/${path}`);
@@ -26,7 +28,9 @@ const MemberPage = () => {
                 <User className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-800">Admin</h2>
+                <h2 className="text-xl font-bold text-gray-800">
+                  {userInfo.name}
+                </h2>
                 <p className="text-sm text-gray-600">Quản lý tài khoản</p>
               </div>
             </div>
