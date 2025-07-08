@@ -14,7 +14,7 @@ const MemberRoutes = () => {
     );
   }
 
-  const isMember = userInfo && userInfo.role === 'ADMIN';
+  const isMember = userInfo && userInfo.role === 'USER';
 
   return isMember ? <Outlet /> : <Navigate to={PATH_NAME.NOT_FOUND} replace />;
 };

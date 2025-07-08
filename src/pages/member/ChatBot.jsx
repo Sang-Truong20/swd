@@ -12,10 +12,11 @@ const ChatBot = ({ onClose }) => {
   const [showAnimation, setShowAnimation] = useState(true);
   const [isTyping, setIsTyping] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [hasUserSentMessage, setHasUserSentMessage] = useState(false);
   const chatContainerRef = useRef(null);
   const textareaRef = useRef(null);
 
-  const userId = useMemo(() => '12cae9be-2b04-4144-a836-468d1449399a', []);
+  const userId = localStorage.getItem('userId');
 
   const { data: messagesList } = useQuery({
     queryKey: ['chatHistory', userId],
@@ -104,6 +105,13 @@ const ChatBot = ({ onClose }) => {
 
       if (isDifferent) {
         setMessages(newMessages);
+        const hasUserMessage = transformedMessages.some(
+          (msg) => msg.type === 'message' && msg.sender === 'me',
+        );
+        if (hasUserMessage) {
+          setHasUserSentMessage(true);
+        }
+
         if (!isInitialized) {
           setIsInitialized(true);
           setTimeout(() => {
@@ -159,6 +167,8 @@ const ChatBot = ({ onClose }) => {
   const handleSend = async (message = input) => {
     if (!message.trim() || isLoading) return;
 
+    setHasUserSentMessage(true);
+
     const now = new Date();
     const time = now.toLocaleTimeString('vi-VN', {
       hour: '2-digit',
@@ -203,7 +213,9 @@ const ChatBot = ({ onClose }) => {
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
       const answer =
-        res?.data?.answer || res?.data || 'Không nhận được phản hồi từ server.';
+        res?.data?.answer ||
+        res?.data ||
+        'Không nhận được phản hồi từ hệ thống';
 
       setIsTyping(false);
       setMessages((prev) => [
@@ -264,7 +276,7 @@ const ChatBot = ({ onClose }) => {
     }
   };
 
-  const showQuickOptions = listMessage.length === 0;
+  const showQuickOptions = !hasUserSentMessage;
 
   return (
     <div className="w-full h-full max-w-4xl mx-auto">
@@ -360,7 +372,7 @@ const ChatBot = ({ onClose }) => {
             return (
               <div
                 key={idx}
-                className={`flex items-start gap-3 ${
+                className={`flex items-start gap-3 mt-5 ${
                   item.sender === 'me' ? 'flex-row-reverse' : ''
                 } group`}
               >
