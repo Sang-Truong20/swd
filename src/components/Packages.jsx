@@ -10,6 +10,7 @@ const Packages = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const isAuthenticated = localStorage.getItem('isAuthenticated');
   const navigate = useNavigate();
+
   const apiData = [
     {
       get_id: '1',
@@ -117,6 +118,8 @@ const Packages = () => {
     },
     onError: (err) => {
       console.log('Payment error:', err);
+      localStorage.removeItem('usagePackageId');
+
       notify('error', { description: 'Lỗi hệ thống' });
     },
   });
@@ -137,6 +140,7 @@ const Packages = () => {
       transactionMethod: 'VNPAY',
       usagePackageId: pkg.apiData.usagePackageId,
     };
+    localStorage.setItem('usagePackageId', payload.usagePackageId);
 
     setIsProcessing(true);
     mutatePayment(payload);

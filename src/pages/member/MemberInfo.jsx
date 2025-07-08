@@ -75,6 +75,7 @@ const MemberInfo = () => {
               <Input
                 className="!py-3 !px-4 !text-base !rounded-lg !border-gray-300 focus:!border-blue-500"
                 placeholder="Nhập tên đăng nhập"
+                readOnly
               />
             </Form.Item>
 
@@ -103,6 +104,7 @@ const MemberInfo = () => {
               <Input
                 className="!py-3 !px-4 !text-base !rounded-lg !border-gray-300 focus:!border-blue-500"
                 placeholder="example@email.com"
+                readOnly
               />
             </Form.Item>
           </div>
@@ -123,18 +125,7 @@ const MemberInfo = () => {
                 }}
               />
             </Form.Item>
-            <Form.Item
-              label="Số điện thoại"
-              name="phone"
-              rules={[
-                { required: true, message: 'Vui lòng nhập số điện thoại' },
-              ]}
-            >
-              <Input
-                className="!py-3 !px-4 !text-base !rounded-lg !border-gray-300 focus:!border-blue-500"
-                placeholder="Nhập số điện thoại"
-              />
-            </Form.Item>
+
             <Form.Item
               name="avatarUrlText"
               // rules={[{ required: true, message: 'Vui lòng chọn hình ảnh' }]}
