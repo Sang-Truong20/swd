@@ -9,15 +9,16 @@ import { notify } from '../../utils';
 
 const MemberInfo = () => {
   const [form] = Form.useForm();
-  const userId = useMemo(() => '12cae9be-2b04-4144-a836-468d1449399a', []);
+  const userId = localStorage.getItem('userId');
   const [fileChange, setFileChange] = useState('');
   const [isUploading, setIsUploading] = useState(false);
-  const { userInfo } = useUserData();
-  console.log('chek userInfo', userInfo);
+  const { userInfo, refetch } = useUserData();
+
   useEffect(() => {
     if (userInfo) {
       form.setFieldsValue({
         ...userInfo,
+        birthday: userInfo.birthday ? dayjs(userInfo.birthday) : null,
         avatarUrlText: fileChange,
       });
     }
@@ -29,6 +30,7 @@ const MemberInfo = () => {
       notify('success', {
         description: 'Cập nhật thông tin người dùng thành công',
       });
+      refetch();
     },
     onError: () => {
       notify('error', { description: 'Lỗi hệ thống' });
@@ -36,16 +38,32 @@ const MemberInfo = () => {
   });
 
   const onFinish = (values) => {
+    // eslint-disable-next-line no-unused-vars
+    const { userName, email, ...rest } = values;
+
     const payload = {
-      ...values,
-      birthday: values.birthday.format('YYYY-MM-DD'),
+      ...rest,
+      birthday: values.birthday ? values.birthday.format('YYYY-MM-DD') : null,
     };
+
     mutateUpdateUserInfo({ payload, userId });
   };
 
   const handleFileChange = useCallback((newFileChange) => {
     setFileChange(newFileChange);
   }, []);
+
+  const normalizedInitialValues = useMemo(() => {
+    if (!userInfo) return {};
+
+    return {
+      ...userInfo,
+      birthday:
+        userInfo.birthday && dayjs(userInfo.birthday).isValid()
+          ? dayjs(userInfo.birthday)
+          : null,
+    };
+  }, [userInfo]);
 
   return (
     <div className="space-y-6">
@@ -59,7 +77,7 @@ const MemberInfo = () => {
       <Form
         form={form}
         layout="vertical"
-        initialValues={userInfo}
+        initialValues={normalizedInitialValues}
         onFinish={onFinish}
         className="max-w-4xl mx-auto p-6 bg-white rounded-lg"
       >
@@ -78,18 +96,6 @@ const MemberInfo = () => {
                 readOnly
               />
             </Form.Item>
-
-            <Form.Item
-              label="Họ và tên"
-              name="name"
-              rules={[{ required: true, message: 'Vui lòng nhập họ và tên' }]}
-            >
-              <Input
-                className="!py-3 !px-4 !text-base !rounded-lg !border-gray-300 focus:!border-blue-500"
-                placeholder="Nhập họ và tên"
-              />
-            </Form.Item>
-
             <Form.Item
               label="Email"
               name="email"
@@ -107,6 +113,16 @@ const MemberInfo = () => {
                 readOnly
               />
             </Form.Item>
+            <Form.Item
+              label="Họ và tên"
+              name="name"
+              rules={[{ required: true, message: 'Vui lòng nhập họ và tên' }]}
+            >
+              <Input
+                className="!py-3 !px-4 !text-base !rounded-lg !border-gray-300 focus:!border-blue-500"
+                placeholder="Nhập họ và tên"
+              />
+            </Form.Item>
           </div>
 
           <div className="space-y-4">
@@ -114,6 +130,12 @@ const MemberInfo = () => {
               label="Ngày sinh"
               name="birthday"
               rules={[{ required: true, message: 'Vui lòng chọn ngày sinh' }]}
+              normalize={(value) => {
+                // Normalize giá trị để đảm bảo nó luôn là dayjs object
+                if (!value) return null;
+                if (dayjs.isDayjs(value)) return value;
+                return dayjs(value).isValid() ? dayjs(value) : null;
+              }}
             >
               <DatePicker
                 placeholder="Chọn ngày sinh"
@@ -134,7 +156,7 @@ const MemberInfo = () => {
               <div className="flex w-full flex-col items-center">
                 <UploadImage
                   titleButton="Thêm ảnh"
-                  initialImage={userInfo.avatarUrlText ?? ''}
+                  initialImage={userInfo?.avatarUrlText ?? ''}
                   onFileChange={handleFileChange}
                   onUploadingChange={(status) => setIsUploading(status)}
                 />

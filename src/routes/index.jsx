@@ -52,6 +52,10 @@ const router = createBrowserRouter([
         element: withSuspense(PostDetail),
       },
       {
+        path: PATH_NAME.PAYMENT,
+        element: withSuspense(PaymentPage),
+      },
+      {
         element: <MemberRoutes />,
         children: [
           {
@@ -71,10 +75,6 @@ const router = createBrowserRouter([
                 element: withSuspense(PackageManager),
               },
             ],
-          },
-          {
-            path: PATH_NAME.PAYMENT,
-            element: withSuspense(PaymentPage),
           },
         ],
       },
@@ -99,7 +99,6 @@ const router = createBrowserRouter([
       },
     ],
   },
-
   {
     path: PATH_NAME.NOT_FOUND,
     element: <NotFound />,

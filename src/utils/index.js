@@ -56,7 +56,7 @@ export const notify = (type, { description, duration = 3 } = {}) => {
   });
 };
 
-export const formatAmount = (amount) => {
+export const formatAmountVnpayRes = (amount) => {
   const amountInVND = parseInt(amount) / 100;
   return `${amountInVND.toLocaleString('vi-VN')} VND`;
 };
@@ -96,4 +96,27 @@ export const getResponseCodeMessageVnpay = (code) => {
 export const getDateKey = (dateString) => {
   const date = new Date(dateString);
   return date.toDateString();
+};
+
+export const formatDatePackageManager = (dateString) => {
+  return new Date(dateString).toLocaleDateString('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+};
+
+export const getDaysRemaining = (expirationDate) => {
+  const now = new Date();
+  const expDate = new Date(expirationDate);
+  const diffTime = expDate - now;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return diffDays;
+};
+
+export const formatCurrency = (amount) => {
+  const amountInVND = parseInt(amount);
+  return `${amountInVND.toLocaleString('vi-VN')} VND`;
 };

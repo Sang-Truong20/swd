@@ -1,9 +1,9 @@
 import { ArrowRightOutlined, CheckOutlined } from '@ant-design/icons';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PATH_NAME } from '../constants';
-import { payment } from '../services/package';
+import { getAllPackage, payment } from '../services/package';
 import { notify } from '../utils';
 
 const Packages = () => {
@@ -11,103 +11,86 @@ const Packages = () => {
   const isAuthenticated = localStorage.getItem('isAuthenticated');
   const navigate = useNavigate();
 
-  const apiData = [
-    {
-      get_id: '1',
-      usagePackageId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
-      name: 'Gói Cơ Bản',
-      description: '50 token',
-      price: 59000,
-      dailyLimit: 50,
-      daysLimit: 30,
-      isEnable: true,
-      createdDate: '2025-07-05T05:12:58.674Z',
-      updatedDate: '2025-07-05T05:12:58.674Z',
-    },
-    {
-      get_id: '2',
-      usagePackageId: '3fa85f64-5717-4562-b3fc-2c963f66afa7',
-      name: 'Gói Nâng Cao',
-      description: '100 token',
-      price: 199000,
-      dailyLimit: 100,
-      daysLimit: 30,
-      isEnable: true,
-      createdDate: '2025-07-05T05:12:58.674Z',
-      updatedDate: '2025-07-05T05:12:58.674Z',
-    },
-    {
-      get_id: '3',
-      usagePackageId: '3fa85f64-5717-4562-b3fc-2c963f66afa8',
-      name: 'Gói Vip',
-      description: '200 token',
-      price: 399000,
-      dailyLimit: 200,
-      daysLimit: 30,
-      isEnable: true,
-      createdDate: '2025-07-05T05:12:58.674Z',
-      updatedDate: '2025-07-05T05:12:58.674Z',
-    },
-  ];
-
-  const packagesData = apiData.map((item, index) => {
-    const packageConfig = {
-      0: {
-        period: '/ Tháng',
-        description: 'Trải nghiệm cơ bản các tính năng của ứng dụng',
-        features: [
-          'Sử dụng các tính năng cơ bản',
-          'Hỗ trợ khách hàng 24/7',
-          'Truy cập không giới hạn nội dung miễn phí',
-          `Giới hạn ${item.description} mỗi ngày`,
-        ],
-        buttonText: '🚀 Trải nghiệm ngay',
-        isPopular: false,
-      },
-      1: {
-        period: '/ Tháng',
-        description:
-          'Mở khóa các tính năng nâng cao để có trải nghiệm tuyệt vời',
-        features: [
-          'Truy cập toàn bộ tính năng ứng dụng',
-          'Hỗ trợ khách hàng VIP',
-          'Không quảng cáo',
-          'Báo cáo chi tiết và phân tích',
-          `Giới hạn ${item.description} mỗi ngày`,
-        ],
-        buttonText: '🚀 Trải nghiệm ngay',
-        isPopular: true,
-      },
-      2: {
-        period: '/ Tháng',
-        description: 'Gói cao cấp với nhiều tính năng độc quyền',
-        features: [
-          'Truy cập toàn bộ tính năng cao cấp',
-          'Hỗ trợ khách hàng Premium 24/7',
-          'Không quảng cáo',
-          'Báo cáo chi tiết và phân tích nâng cao',
-          'Tích hợp API không giới hạn',
-          `Giới hạn ${item.description} mỗi ngày`,
-        ],
-        buttonText: '🚀 Trải nghiệm ngay',
-        isPopular: false,
-      },
-    };
-
-    const config = packageConfig[index] || packageConfig[0];
-
-    return {
-      id: item.get_id,
-      name: item.name,
-      price: item.price === 0 ? '0đ' : `${item.price.toLocaleString('vi-VN')}đ`,
-      period: config.period,
-      description: config.description,
-      features: config.features,
-      buttonText: config.buttonText,
-      isPopular: config.isPopular,
-      apiData: item,
-    };
+  const { data: packageList } = useQuery({
+    queryKey: ['user-package-list'],
+    queryFn: getAllPackage,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    retry: 1,
   });
+
+  const packageListData = (packageList?.data || []).slice().reverse();
+
+  const packagesData = (packageListData || [])
+    .map((item, index) => {
+      if (!item) return null;
+
+      const dailyLimit = Number(item.dailyLimit) || 0;
+      const daysLimit = Number(item.daysLimit) || 0;
+      const price = Number(item.price) || 0;
+
+      const packageConfig = {
+        0: {
+          period: '/ Tháng',
+          description: 'Trải nghiệm cơ bản các tính năng của ứng dụng',
+          features: [
+            'Sử dụng các tính năng cơ bản',
+            'Hỗ trợ khách hàng 24/7',
+            'Truy cập không giới hạn nội dung miễn phí',
+            `Giới hạn ${dailyLimit} lượt mỗi ngày`,
+            `Sử dụng trong ${daysLimit} ngày`,
+          ],
+          buttonText: '🚀 Trải nghiệm ngay',
+          isPopular: false,
+        },
+        1: {
+          period: '/ Tháng',
+          description:
+            'Mở khóa các tính năng nâng cao để có trải nghiệm tuyệt vời',
+          features: [
+            'Truy cập toàn bộ tính năng ứng dụng',
+            'Hỗ trợ khách hàng VIP',
+            'Không quảng cáo',
+            'Báo cáo chi tiết và phân tích',
+            `Giới hạn ${dailyLimit} lượt mỗi ngày`,
+            `Sử dụng trong ${daysLimit} ngày`,
+          ],
+          buttonText: '🚀 Trải nghiệm ngay',
+          isPopular: true,
+        },
+        2: {
+          period: '/ Tháng',
+          description: 'Gói cao cấp với nhiều tính năng độc quyền',
+          features: [
+            'Truy cập toàn bộ tính năng cao cấp',
+            'Hỗ trợ khách hàng Premium 24/7',
+            'Không quảng cáo',
+            'Báo cáo chi tiết và phân tích nâng cao',
+            'Tích hợp API không giới hạn',
+            `Giới hạn ${dailyLimit} lượt mỗi ngày`,
+            `Sử dụng trong ${daysLimit} ngày`,
+          ],
+          buttonText: '🚀 Trải nghiệm ngay',
+          isPopular: false,
+        },
+      };
+
+      const config = packageConfig[index] || packageConfig[0];
+
+      return {
+        usagePackageId: item.usagePackageId,
+        name: item.name || 'Gói chưa đặt tên',
+        price: price === 0 ? '0đ' : `${price.toLocaleString('vi-VN')}đ`,
+        period: config.period,
+        description: config.description,
+        features: config.features,
+        buttonText: config.buttonText,
+        isPopular: config.isPopular,
+        totalToken: dailyLimit * daysLimit,
+      };
+    })
+    .filter(Boolean)
+    .slice(0, 3);
 
   const { mutate: mutatePayment, isPending } = useMutation({
     mutationFn: payment,
@@ -135,10 +118,10 @@ const Packages = () => {
     }
 
     const payload = {
-      amount: pkg.apiData.price,
-      orderInfo: `Thanh toán ${pkg.name} - ${pkg.apiData.description}`,
+      amount: Number(pkg.price.replace(/[^\d]/g, '')),
+      orderInfo: `Thanh toán ${pkg.name} - ${pkg.totalToken} lượt`,
       transactionMethod: 'VNPAY',
-      usagePackageId: pkg.apiData.usagePackageId,
+      usagePackageId: pkg.usagePackageId,
     };
     localStorage.setItem('usagePackageId', payload.usagePackageId);
 
@@ -163,7 +146,7 @@ const Packages = () => {
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 lg:gap-8 max-w-6xl mx-auto">
           {packagesData.map((pkg) => (
             <div
-              key={pkg.id}
+              key={pkg.usagePackageId}
               className={`relative group flex flex-col rounded-3xl p-8 transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 will-change-transform ${
                 pkg.isPopular
                   ? 'bg-gradient-to-br from-blue-600 via-blue-700 to-purple-700 text-white shadow-2xl shadow-blue-500/30 border-2 border-blue-400'
