@@ -1,17 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Package, Activity, LogOut, Home, BarChart3, FileText, TrendingUp, Bell } from 'lucide-react';
+import { Users, Package, Activity, LogOut, Home, BarChart3 } from 'lucide-react';
 import UserManagement from './components/UserManagement';
 import PackageManagement from './components/PackageManagement';
 import UserPackageManagement from './components/UserPackageManagement';
-import LawsManagement from './components/LawsManagement';
 import { analyticsService } from './services/adminService';
-import { authService } from '../../services/authService';
-import ErrorNotification from '../../components/ErrorNotification';
-import '../../components/ErrorNotification.css';
 import './Dashboard.css';
 
-// Enhanced Dashboard Overview Component
-const DashboardOverview = ({ stats, loading, error, onRetry }) => {
+// Dashboard Overview Component
+const DashboardOverview = ({ stats, loading, error }) => {
   if (loading) {
     return (
       <div className="loading-state">
@@ -25,27 +21,13 @@ const DashboardOverview = ({ stats, loading, error, onRetry }) => {
       <h2>Tổng quan hệ thống</h2>
       
       {error && (
-        <ErrorNotification 
-          error={error} 
-          onRetry={onRetry}
-          className="dashboard-error"
-        />
-      )}
-    
-      
-      {/* Main Statistics */}
-      <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-icon">
-            <Users size={24} />
-          </div>
-          <div className="stat-content">
-            <h3>{stats?.totalUsers || 0}</h3>
-            <p>Tổng người dùng</p>
-            <small>{stats?.activeUsers || 0} đang hoạt động</small>
-          </div>
+        <div className="alert alert-warning">
+          <p>⚠️ Cảnh báo: {error}</p>
+          <p>Một số dữ liệu có thể không hiển thị do lỗi kết nối API.</p>
         </div>
-
+      )}
+      
+      <div className="stats-grid">
         <div className="stat-card">
           <div className="stat-icon">
             <Package size={24} />
@@ -65,17 +47,6 @@ const DashboardOverview = ({ stats, loading, error, onRetry }) => {
             <h3>{stats?.totalSubscriptions || 0}</h3>
             <p>Tổng đăng ký</p>
             <small>{stats?.activeSubscriptions || 0} đang hoạt động</small>
-          </div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-icon">
-            <FileText size={24} />
-          </div>
-          <div className="stat-content">
-            <h3>{stats?.totalLaws || 0}</h3>
-            <p>Văn bản pháp luật</p>
-            <small>{stats?.activeLaws || 0} có hiệu lực</small>
           </div>
         </div>
 
@@ -101,12 +72,25 @@ const DashboardOverview = ({ stats, loading, error, onRetry }) => {
         </div>
       </div>
 
-      {error && (
-        <div className="fallback-note">
-          <p>Có lỗi kết nối API, vui lòng thử lại sau</p>
-          <small>Cập nhật lần cuối: {new Date().toLocaleString('vi-VN')}</small>
+      <div className="recent-activities">
+        <h3>Hoạt động gần đây</h3>
+        <div className="activity-list">
+          <div className="activity-item">
+            <div className="activity-icon">
+              <Users size={16} />
+            </div>
+            <div className="activity-content">
+              <p>
+                {error 
+                  ? 'Có lỗi kết nối API, một số dữ liệu có thể không chính xác' 
+                  : 'Hệ thống đang hoạt động bình thường'
+                }
+              </p>
+              <small>Cập nhật lần cuối: {new Date().toLocaleString('vi-VN')}</small>
+            </div>
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };
@@ -116,13 +100,6 @@ const Dashboard = () => {
   const [dashboardStats, setDashboardStats] = useState({});
   const [statsLoading, setStatsLoading] = useState(true);
   const [statsError, setStatsError] = useState(null);
-  const [currentUser, setCurrentUser] = useState(null);
-
-  // Load current user info
-  useEffect(() => {
-    const user = authService.getCurrentUser();
-    setCurrentUser(user);
-  }, []);
 
   // Navigation handlers
   const handleGoToHome = () => {
@@ -131,8 +108,9 @@ const Dashboard = () => {
 
   const handleLogout = () => {
     if (window.confirm('Bạn có chắc chắn muốn đăng xuất?')) {
-      // Clear auth data using authService
-      authService.logout();
+      // Clear any stored auth data
+      localStorage.removeItem('authToken');
+      sessionStorage.clear();
       // Redirect to login or home
       window.location.href = '/auth';
     }
@@ -156,20 +134,21 @@ const Dashboard = () => {
         expiringSoon: 0
       });
       
+      // Clear error if successful
       setStatsError(null);
       
     } catch (err) {
-      console.error('Error loading dashboard stats:', err);
-      setStatsError(err);
+      console.error('❌ Error loading dashboard stats:', err);
+      setStatsError(err.message || 'Không thể tải thống kê');
       
-      // Set empty stats when API fails
+      // Set fallback stats
       setDashboardStats({
-        totalPackages: 0,
-        activePackages: 0,
-        totalSubscriptions: 0,
-        activeSubscriptions: 0,
-        expiredSubscriptions: 0,
-        blockedSubscriptions: 0,
+        totalPackages: 4,
+        activePackages: 3,
+        totalSubscriptions: 4,
+        activeSubscriptions: 2,
+        expiredSubscriptions: 1,
+        blockedSubscriptions: 1,
         expiringSoon: 0
       });
       
@@ -183,14 +162,13 @@ const Dashboard = () => {
   }, []);
 
   const menuItems = [
-    { id: 'overview', label: 'Tổng quan', icon: BarChart3, component: () => <DashboardOverview stats={dashboardStats} loading={statsLoading} error={statsError} onRetry={loadDashboardStats} /> },
+    { id: 'overview', label: 'Tổng quan', icon: BarChart3, component: () => <DashboardOverview stats={dashboardStats} loading={statsLoading} error={statsError} /> },
     { id: 'users', label: 'Quản lý Users', icon: Users, component: UserManagement },
     { id: 'packages', label: 'Quản lý Packages', icon: Package, component: PackageManagement },
     { id: 'user-packages', label: 'Quản lý Subscriptions', icon: Activity, component: UserPackageManagement },
-    { id: 'laws', label: 'Quản lý Văn bản', icon: FileText, component: LawsManagement },
   ];
 
-  const ActiveComponent = menuItems.find(item => item.id === activeTab)?.component || (() => <DashboardOverview stats={dashboardStats} loading={statsLoading} error={statsError} onRetry={loadDashboardStats} />);
+  const ActiveComponent = menuItems.find(item => item.id === activeTab)?.component || (() => <DashboardOverview stats={dashboardStats} loading={statsLoading} error={statsError} />);
 
   return (
     <div className="admin-dashboard">
