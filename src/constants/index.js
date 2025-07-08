@@ -3,6 +3,8 @@ const PATH_NAME = {
   AUTH: '/auth',
   POST: '/post',
   POST_DETAIL: '/post/:id',
+  LAWS: '/laws',
+  LAW_DETAIL: '/laws/:id',
   NOT_FOUND: '*',
   MEMBER: '/member',
   ADMIN: '/admin',
@@ -21,8 +23,8 @@ const NAV_ELEMENTS = [
     path: '/',
   },
   {
-    name: 'BÀI VIẾT',
-    path: '#',
+    name: 'VĂN BẢN PHÁP LUẬT',
+    path: PATH_NAME.LAWS,
   },
   // {
   //   name: 'TRỢ LÝ ẢO',

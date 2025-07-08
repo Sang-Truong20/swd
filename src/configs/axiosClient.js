@@ -3,55 +3,76 @@ import Cookies from 'js-cookie';
 import { refresh } from '../services/auth';
 
 const axiosClient = axios.create({
-  baseURL: 'http://localhost:8080/api/v1',
+  baseURL: import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? '' : 'http://localhost:8080'),
   headers: {
     'Content-Type': 'application/json',
   },
+  timeout: 30000, // 30 seconds timeout
+  withCredentials: false, // Disable credentials for CORS
 });
 
 axiosClient.interceptors.request.use(
   async (config) => {
-    const accessToken = Cookies.get('accessToken');
-    if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
+    // Thêm token vào header nếu có
+    const token = localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Log request for debugging
+    console.log('🔗 API Request:', {
+      method: config.method?.toUpperCase(),
+      url: config.url,
+      baseURL: config.baseURL,
+      fullURL: `${config.baseURL}${config.url}`,
+      headers: config.headers,
+      hasToken: !!token
+    });
+    
     return config;
   },
   (err) => {
+    console.error('Request Error:', err);
     return Promise.reject(err);
   },
 );
 
 axiosClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Log successful response
+    console.log('API Response:', {
+      status: response.status,
+      url: response.config.url,
+      data: response.data
+    });
+    return response;
+  },
   async (error) => {
-    const originalRequest = error.config;
+    // Log error response
+    console.error('API Error:', {
+      status: error.response?.status,
+      url: error.config?.url,
+      message: error.response?.data?.message || error.message,
+      data: error.response?.data
+    });
 
-    if (error?.response?.status === 403 && !originalRequest._retry) {
-      originalRequest._retry = true;
-
-      const refreshToken = Cookies.get('refreshToken');
-
-      if (refreshToken) {
-        try {
-          const res = await refresh({ refreshToken: refreshToken });
-
-          if (res && res.status === 200) {
-            const newAccessToken = res.data.accessToken;
-
-            Cookies.set('accessToken', newAccessToken);
-
-            originalRequest.headers['Authorization'] =
-              `Bearer ${newAccessToken}`;
-            axiosClient.defaults.headers.common['Authorization'] =
-              `Bearer ${newAccessToken}`;
-
-            return axiosClient(originalRequest);
-          }
-        } catch (error) {
-          console.error('err', error);
-        }
+    // Handle 401 (Unauthorized) - token expired or invalid
+    if (error.response?.status === 401) {
+      console.warn('Token expired or invalid, clearing auth data');
+      localStorage.removeItem('authToken');
+      sessionStorage.removeItem('authToken');
+      // Redirect to login if not already there
+      if (!window.location.pathname.includes('/auth')) {
+        window.location.href = '/auth';
       }
+    }
+
+    // Handle 403 (Forbidden) - insufficient permissions
+    if (error.response?.status === 403) {
+      console.warn('Access denied - insufficient permissions');
+      // You might want to show a permission denied message
+      // or redirect to a different page
+
     }
 
     return Promise.reject(error);
