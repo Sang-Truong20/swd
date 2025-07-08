@@ -22,7 +22,13 @@ function AuthPage() {
                 <FaBalanceScale className="text-3xl !text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-white">LawTraffic</h1>
+                <div className="space-y-2">
+                  <h1 className="text-3xl font-bold text-white leading-tight">
+                    Smart
+                    <span className="text-yellow-400 drop-shadow-lg">Law</span>
+                    <span className="text-blue-200">GT</span>
+                  </h1>
+                </div>
                 <p className="text-blue-200">Tư vấn pháp luật giao thông</p>
               </div>
             </div>
@@ -87,7 +93,7 @@ function AuthPage() {
               <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center">
                 <CarOutlined className="text-2xl !text-white" />
               </div>
-              <h1 className="text-2xl font-bold text-gray-800">LawTraffic</h1>
+              <h1 className="text-2xl font-bold text-gray-800">SmartLawGT</h1>
             </div>
           </div>
 
@@ -98,7 +104,7 @@ function AuthPage() {
           )}
 
           <div className="text-center mt-6 text-sm text-gray-500">
-            <p>© 2025 LawTraffic. Nền tảng tư vấn pháp luật giao thông.</p>
+            <p>© 2025 SmartLawGT. Nền tảng tư vấn pháp luật giao thông.</p>
           </div>
         </div>
       </div>

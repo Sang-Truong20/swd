@@ -11,6 +11,7 @@ const ChangePassword = () => {
     mutationFn: changePassword,
     onSuccess: () => {
       notify('success', { description: 'Đổi mật khẩu thành công' });
+      form.resetFields();
     },
     onError: () => {
       notify('error', { description: 'Lỗi hệ thống' });

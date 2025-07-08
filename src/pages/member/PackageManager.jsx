@@ -1,13 +1,18 @@
 import { useQuery } from '@tanstack/react-query';
 import { Modal } from 'antd';
-import { Calendar, Clock, CreditCard, Package } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { Calendar, Clock, CreditCard, Inbox, Package } from 'lucide-react';
+import { useState } from 'react';
 import { getUserPackageHistory } from '../../services/user-package';
+import {
+  formatCurrency,
+  formatDatePackageManager,
+  getDaysRemaining,
+} from '../../utils';
 
 const PackageManager = () => {
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const userId = useMemo(() => '12cae9be-2b04-4144-a836-468d1449399a', []);
+  const userId = localStorage.getItem('userId');
 
   const { data: packageHistory } = useQuery({
     queryKey: ['user-package', userId],
@@ -24,70 +29,6 @@ const PackageManager = () => {
   });
 
   const packageHistoryList = packageHistory?.data?.content || [];
-
-  console.log('check packageHistory', packageHistoryList);
-
-  // const packagesData = [
-  //   {
-  //     _id: '68669b6ef6f19157c991a3cb',
-  //     userPackageId: 1,
-  //     userId: '12cae9be-2b04-4144-a836-468d1449399a',
-  //     userName: null,
-  //     usagePackageId: '876c9616-503d-484e-8e11-33790786b3f4',
-  //     packageName: '123',
-  //     packagePrice: 100000,
-  //     dailyLimit: 5,
-  //     daysLimit: 5,
-  //     transactionDate: '2025-07-03T22:02:05.945',
-  //     transactionMethod: 'VNPAY',
-  //     expirationDate: '2025-07-08T22:02:05.945',
-  //     status: 'ACTIVE',
-  //     createdDate: '2025-07-03T22:02:06.145',
-  //     updatedDate: '2025-07-03T22:02:06.145',
-  //   },
-  //   {
-  //     _id: '68669b71f6f19157c991a3cc',
-  //     userPackageId: 2,
-  //     userId: '12cae9be-2b04-4144-a836-468d1449399a',
-  //     userName: null,
-  //     usagePackageId: '876c9616-503d-484e-8e11-33790786b3f4',
-  //     packageName: '123',
-  //     packagePrice: 100000,
-  //     dailyLimit: 5,
-  //     daysLimit: 5,
-  //     transactionDate: '2025-07-03T22:02:09.94',
-  //     transactionMethod: 'VNPAY',
-  //     expirationDate: '2025-07-08T22:02:09.94',
-  //     status: 'ACTIVE',
-  //     createdDate: '2025-07-03T22:02:09.978',
-  //     updatedDate: '2025-07-03T22:02:09.978',
-  //   },
-  // ];
-
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
-    }).format(price);
-  };
-
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('vi-VN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
-  const getDaysRemaining = (expirationDate) => {
-    const now = new Date();
-    const expDate = new Date(expirationDate);
-    const diffTime = expDate - now;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
-  };
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -111,6 +52,19 @@ const PackageManager = () => {
     return 'from-gray-50 to-gray-100 border-gray-200';
   };
 
+  const getStatusText = (status) => {
+    switch (status) {
+      case 'ACTIVE':
+        return 'Đang hoạt động';
+      case 'EXPIRED':
+        return 'Đã hết hạn';
+      case 'PENDING':
+        return 'Chờ xử lý';
+      default:
+        return 'Không xác định';
+    }
+  };
+
   const getIconColor = (status, index) => {
     if (status === 'ACTIVE') {
       return index % 2 === 0 ? 'bg-blue-600' : 'bg-green-600';
@@ -131,7 +85,9 @@ const PackageManager = () => {
   return (
     <div className="space-y-6">
       <div className="border-b border-gray-200 pb-4">
-        <h2 className="text-2xl font-bold text-gray-800">Quản lý Package</h2>
+        <h2 className="text-2xl font-bold text-gray-800">
+          Quản lý gói dịch vụ
+        </h2>
         <p className="text-gray-600 mt-2">Quản lý các gói dịch vụ của bạn</p>
       </div>
 
@@ -143,7 +99,7 @@ const PackageManager = () => {
 
           return (
             <div
-              key={packageData?._id}
+              key={packageData?.usagePackageId}
               className={`bg-gradient-to-br ${getPackageGradient(actualStatus, index)} rounded-xl p-6 border cursor-pointer hover:shadow-lg transition-shadow`}
               onClick={() => handlePackageClick(packageData)}
             >
@@ -158,7 +114,7 @@ const PackageManager = () => {
                     {packageData?.packageName}
                   </h3>
                   <p className="text-sm text-gray-600">
-                    ID: {packageData?.userPackageId}
+                    ID: {packageData?.usagePackageId}
                   </p>
                 </div>
               </div>
@@ -166,15 +122,15 @@ const PackageManager = () => {
                 <div className="flex justify-between">
                   <span className="text-gray-600">Giá:</span>
                   <span className="font-semibold text-blue-700">
-                    {formatPrice(packageData?.packagePrice)}
+                    {formatCurrency(packageData?.packagePrice)}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Trạng thái:</span>
                   <span
-                    className={`px-2 py-1 ${getStatusColor(actualStatus)} rounded-full text-xs`}
+                    className={`px-2 py-1 ${getStatusColor(actualStatus)} rounded-full text-xs font-semibold`}
                   >
-                    {actualStatus}
+                    {getStatusText(actualStatus)}
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -188,7 +144,7 @@ const PackageManager = () => {
                 <div className="flex justify-between">
                   <span className="text-gray-600">Giới hạn/ngày:</span>
                   <span className="font-semibold text-gray-700">
-                    {packageData?.dailyLimit}
+                    {packageData?.dailyLimit} lượt
                   </span>
                 </div>
               </div>
@@ -196,6 +152,15 @@ const PackageManager = () => {
           );
         })}
       </div>
+
+      {packageHistoryList.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-12 text-gray-500">
+          <Inbox className="w-12 h-12 mb-4 text-gray-400" />
+          <p className="text-center text-sm">
+            Bạn chưa có lịch sử sử dụng gói dịch vụ nào.
+          </p>
+        </div>
+      )}
 
       <Modal
         title="Chi tiết gói dịch vụ"
@@ -224,7 +189,7 @@ const PackageManager = () => {
               <div>
                 <span className="text-sm text-gray-600">Giá:</span>
                 <p className="font-semibold text-blue-700">
-                  {formatPrice(selectedPackage?.packagePrice)}
+                  {formatCurrency(selectedPackage?.packagePrice)}
                 </p>
               </div>
               <div>
@@ -276,7 +241,7 @@ const PackageManager = () => {
               <div>
                 <span className="text-sm text-gray-600">Ngày giao dịch:</span>
                 <p className="font-semibold">
-                  {formatDate(selectedPackage?.transactionDate)}
+                  {formatDatePackageManager(selectedPackage?.transactionDate)}
                 </p>
               </div>
             </div>
@@ -291,19 +256,19 @@ const PackageManager = () => {
               <div>
                 <span className="text-sm text-gray-600">Ngày tạo:</span>
                 <p className="font-semibold">
-                  {formatDate(selectedPackage?.createdDate)}
+                  {formatDatePackageManager(selectedPackage?.createdDate)}
                 </p>
               </div>
               <div>
                 <span className="text-sm text-gray-600">Cập nhật cuối:</span>
                 <p className="font-semibold">
-                  {formatDate(selectedPackage?.updatedDate)}
+                  {formatDatePackageManager(selectedPackage?.updatedDate)}
                 </p>
               </div>
               <div>
                 <span className="text-sm text-gray-600">Ngày hết hạn:</span>
                 <p className="font-semibold">
-                  {formatDate(selectedPackage?.expirationDate)}
+                  {formatDatePackageManager(selectedPackage?.expirationDate)}
                 </p>
               </div>
               <div>

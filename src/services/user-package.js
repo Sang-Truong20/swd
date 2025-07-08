@@ -32,7 +32,12 @@ const getUserPackageActive = (userId) => {
   return axiosClient.get(`/query/package/user/active/${userId}`);
 };
 
+const createPackageAfterPayment = (payload) => {
+  return axiosClient.post(`/command/user-package`, payload);
+};
+
 export {
+  createPackageAfterPayment,
   getUserPackage,
   getUserPackageActive,
   getUserPackageExpired,

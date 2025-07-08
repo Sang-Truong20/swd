@@ -1,11 +1,26 @@
 import { memo, useState } from 'react';
 import { FaComments } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import { PATH_NAME } from '../constants';
+import { useUserData } from '../hooks/useUserData';
 import ChatBot from '../pages/member/ChatBot';
+import { notify } from '../utils';
 
 const ChatWidget = ({ hasPackage = true }) => {
   const [open, setOpen] = useState(false);
+  const isAuthenticated = localStorage.getItem('isAuthenticated');
+  const { userInfo } = useUserData();
+  const navigate = useNavigate();
 
   const handleOpen = () => {
+    if (!isAuthenticated && !userInfo) {
+      navigate(PATH_NAME.AUTH);
+      notify('info', {
+        description: 'Vui lòng đăng nhập trước khi sử dụng dịch vụ',
+      });
+      return;
+    }
+
     if (hasPackage) {
       setOpen(true);
     } else {

@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { QueryClient, useMutation } from '@tanstack/react-query';
 import { Spin } from 'antd';
 import {
   Check,
@@ -14,13 +14,14 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import VNPAY from '../../assets/images/vnpay_logo.jpg';
 import { useClipboard } from '../../hooks/useClipboard';
-import { createPackageAfterPayment } from '../../services/package';
+import { createPackageAfterPayment } from '../../services/user-package';
 import {
-  formatAmount,
+  formatAmountVnpayRes,
   formatDate,
   getResponseCodeMessageVnpay,
   notify,
 } from '../../utils';
+const queryClient = new QueryClient();
 
 const Payment = () => {
   const [paymentData, setPaymentData] = useState(null);
@@ -33,6 +34,7 @@ const Payment = () => {
     useMutation({
       mutationFn: createPackageAfterPayment,
       onSuccess: () => {
+        queryClient.invalidateQueries(['user-package']);
         localStorage.removeItem('usagePackageId');
       },
       onError: () => {
@@ -62,6 +64,8 @@ const Payment = () => {
     setPaymentData(data);
     if (data?.vnp_TransactionStatus === '00') {
       mutateCreatePackage(payload);
+    } else {
+      localStorage.removeItem('usagePackageId');
     }
   }, []);
 
@@ -181,7 +185,7 @@ const Payment = () => {
                   </div>
                   <div className="text-right">
                     <div className="text-2xl font-bold text-blue-600">
-                      {formatAmount(paymentData?.vnp_Amount)}
+                      {formatAmountVnpayRes(paymentData?.vnp_Amount)}
                     </div>
                     <div className="text-xs text-gray-500">Đã bao gồm VAT</div>
                   </div>
@@ -238,7 +242,7 @@ const Payment = () => {
                     paymentData?.vnp_TransactionNo !== '0' && (
                       <div className="px-4 py-3 flex justify-between items-center">
                         <span className="text-gray-600 text-sm">
-                          Số GD VNPay
+                          Mã giao dịch
                         </span>
                         <div className="flex items-center">
                           <span className="font-mono text-sm font-medium mr-2">
@@ -294,7 +298,7 @@ const Payment = () => {
                     </div>
                     <div className="text-right">
                       <div className="text-3xl font-extrabold text-blue-600">
-                        {formatAmount(paymentData?.vnp_Amount)}
+                        {formatAmountVnpayRes(paymentData?.vnp_Amount)}
                       </div>
                     </div>
                   </div>
