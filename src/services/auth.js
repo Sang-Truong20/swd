@@ -12,4 +12,8 @@ const refresh = (payload) => {
   return axiosClient.post(`/query/auth/refresh`, payload);
 };
 
-export { login, refresh, register };
+const me = (userId) => {
+  return axiosClient.get(`/query/users/userId/${userId}`);
+};
+
+export { login, refresh, register, me };

@@ -1,24 +1,21 @@
 import { useState } from 'react';
+import { FaBalanceScale } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
 import { PATH_NAME } from '../../constants';
 import { useLogout } from '../../hooks/useLogout';
+import { useUserData } from '../../hooks/useUserData';
 import { useNotificationStore } from '../../store/useNotificationStore';
 import NotificationBell from '../NotificationBell';
 import UserMenu from '../UserMenu';
 import NavElements from './NavElements';
-import { FaBalanceScale } from 'react-icons/fa';
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { count: notificationCount } = useNotificationStore();
   const isAuthenticated = localStorage.getItem('isAuthenticated');
   const navigate = useNavigate();
-  const user = {
-    name: 'Sang Truong',
-    email: 'sangtpse171049@fpt.edu.vn',
-    avatar: null,
-  };
   const logout = useLogout();
+  const { userInfo } = useUserData();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -60,7 +57,7 @@ const Navbar = () => {
                 <>
                   <NotificationBell count={notificationCount} />
                   <div className="h-8 w-px bg-gray-300" />
-                  <UserMenu user={user} onLogout={handleLogout} />
+                  <UserMenu user={userInfo} onLogout={handleLogout} />
                 </>
               ) : (
                 <button
@@ -77,7 +74,7 @@ const Navbar = () => {
             {isAuthenticated ? (
               <>
                 <NotificationBell count={notificationCount} />
-                <UserMenu user={user} onLogout={handleLogout} mobile />
+                <UserMenu user={userInfo} onLogout={handleLogout} mobile />
               </>
             ) : (
               <button

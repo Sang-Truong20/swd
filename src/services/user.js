@@ -5,7 +5,13 @@ const createUser = (payload) => {
 };
 
 const updateUserInfo = ({ payload, userId }) => {
-  return axiosClient.post(`/command/user/${userId}`, payload);
+  return axiosClient.put(`/command/user/${userId}`, payload);
 };
 
-export { createUser, updateUserInfo };
+const changePassword = ({ userId, oldPassword, newPassword }) => {
+  return axiosClient.put(
+    `/command/user/${userId}/change-password?oldPassword=${oldPassword}&newPassword=${newPassword}`,
+  );
+};
+
+export { createUser, updateUserInfo, changePassword };

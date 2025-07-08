@@ -1,18 +1,31 @@
-import { Button, Form, Input, message } from 'antd';
-import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { Button, Form, Input } from 'antd';
+import { changePassword } from '../../services/user';
+import { notify } from '../../utils';
 
 const ChangePassword = () => {
   const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
+  const userId = localStorage.getItem('userId');
+
+  const { mutate: mutateChangePassword, isPending } = useMutation({
+    mutationFn: changePassword,
+    onSuccess: () => {
+      notify('success', { description: 'Đổi mật khẩu thành công' });
+    },
+    onError: () => {
+      notify('error', { description: 'Lỗi hệ thống' });
+    },
+  });
 
   const onFinish = (values) => {
-    console.log('values', values);
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      message.success('Đổi mật khẩu thành công!');
-      form.resetFields();
-    }, 1200);
+    if (!values) return;
+
+    const payload = {
+      userId,
+      oldPassword: values.oldPassword,
+      newPassword: values.newPassword,
+    };
+    mutateChangePassword(payload);
   };
 
   return (
@@ -32,7 +45,7 @@ const ChangePassword = () => {
       >
         <Form.Item
           label="Mật khẩu hiện tại"
-          name="currentPassword"
+          name="oldPassword"
           rules={[
             { required: true, message: 'Vui lòng nhập mật khẩu hiện tại' },
           ]}
@@ -82,7 +95,7 @@ const ChangePassword = () => {
           <Button
             type="primary"
             htmlType="submit"
-            loading={loading}
+            loading={isPending}
             size="large"
             className="!h-12 !px-8 !text-base !font-semibold !rounded-lg !bg-blue-600 hover:!bg-blue-700 !border-0 !shadow-md hover:!shadow-lg transition-all duration-200"
           >

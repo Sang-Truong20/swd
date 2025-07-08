@@ -34,12 +34,13 @@ const UserMenu = ({ user, onLogout, mobile = false }) => {
   };
 
   const getInitials = (name) => {
-    return name
-      .split(' ')
-      .map((word) => word[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
+    if (name)
+      return name
+        .split(' ')
+        .map((word) => word[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
   };
 
   const menuItems = [
@@ -116,15 +117,15 @@ const UserMenu = ({ user, onLogout, mobile = false }) => {
           className="flex items-center space-x-2 p-1 rounded-lg hover:bg-gray-100 transition-colors duration-200"
         >
           <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-            {user.avatar ? (
+            {user && user?.avatarUrlText ? (
               <img
-                src={user.avatar}
-                alt={user.name}
+                src={user.avatarUrlText}
+                alt={user?.name}
                 className="w-8 h-8 rounded-full object-cover"
               />
             ) : (
               <span className="text-white text-xs font-semibold">
-                {getInitials(user.name)}
+                {getInitials(user?.name)}
               </span>
             )}
           </div>
@@ -133,8 +134,10 @@ const UserMenu = ({ user, onLogout, mobile = false }) => {
         {isDropdownOpen && (
           <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
             <div className="px-4 py-2 border-b border-gray-200">
-              <p className="text-sm font-semibold text-gray-900">{user.name}</p>
-              <p className="text-xs text-gray-500">{user.email}</p>
+              <p className="text-sm font-semibold text-gray-900">
+                {user?.name}
+              </p>
+              <p className="text-xs text-gray-500">{user?.email}</p>
             </div>
 
             {menuItems.map((item, index) => (
@@ -182,15 +185,15 @@ const UserMenu = ({ user, onLogout, mobile = false }) => {
         className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 transition-colors duration-200 group"
       >
         <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center ring-2 ring-transparent group-hover:ring-blue-200 transition-all duration-200">
-          {user.avatar ? (
+          {user && user?.avatarUrlText ? (
             <img
-              src={user.avatar}
-              alt={user.name}
+              src={user.avatarUrlText}
+              alt={user?.name}
               className="w-10 h-10 rounded-full object-cover"
             />
           ) : (
             <span className="text-white text-sm font-semibold">
-              {getInitials(user.name)}
+              {getInitials(user?.name)}
             </span>
           )}
         </div>
@@ -215,8 +218,8 @@ const UserMenu = ({ user, onLogout, mobile = false }) => {
       {isDropdownOpen && (
         <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
           <div className="px-4 py-3 border-b border-gray-200">
-            <p className="text-sm font-semibold text-gray-900">{user.name}</p>
-            <p className="text-xs text-gray-500">{user.email}</p>
+            <p className="text-sm font-semibold text-gray-900">{user?.name}</p>
+            <p className="text-xs text-gray-500">{user?.email}</p>
           </div>
 
           {menuItems.map((item, index) => (

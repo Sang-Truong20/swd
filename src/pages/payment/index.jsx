@@ -1,3 +1,4 @@
+import { useMutation } from '@tanstack/react-query';
 import { Spin } from 'antd';
 import {
   Check,
@@ -10,20 +11,43 @@ import {
   XCircle,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import VNPAY from '../../assets/images/vnpay_logo.jpg';
 import { useClipboard } from '../../hooks/useClipboard';
+import { createPackageAfterPayment } from '../../services/package';
 import {
   formatAmount,
   formatDate,
   getResponseCodeMessageVnpay,
+  notify,
 } from '../../utils';
 
 const Payment = () => {
   const [paymentData, setPaymentData] = useState(null);
   const { copiedField, copyToClipboard } = useClipboard();
+  const navigate = useNavigate();
+  const usagePackageId = localStorage.getItem('usagePackageId');
+  const userId = localStorage.getItem('userId');
+
+  const { mutate: mutateCreatePackage, isPending: isLoadingCreatePackage } =
+    useMutation({
+      mutationFn: createPackageAfterPayment,
+      onSuccess: () => {
+        localStorage.removeItem('usagePackageId');
+      },
+      onError: () => {
+        notify('error', { description: 'Lỗi hệ thống' });
+        localStorage.removeItem('usagePackageId');
+      },
+    });
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
+    const payload = {
+      userId,
+      usagePackageId,
+      transactionMethod: 'VNPAY',
+    };
     let data = {};
 
     for (const [key, value] of urlParams.entries()) {
@@ -31,23 +55,14 @@ const Payment = () => {
     }
 
     if (Object.keys(data).length === 0) {
-      data = {
-        vnp_Amount: '19900000',
-        vnp_BankCode: 'NCB',
-        vnp_CardType: 'QRCODE',
-        vnp_OrderInfo: 'Thanh toán Gói Nâng Cao - 100 token',
-        vnp_PayDate: '20250706172332',
-        vnp_ResponseCode: '00',
-        vnp_TmnCode: '6DYQMPNG',
-        vnp_TransactionNo: '0',
-        vnp_TransactionStatus: '00',
-        vnp_TxnRef: '1751797361329',
-        vnp_SecureHash:
-          '5f6e7147e4aea745e098535bd36bd4ec45919c110a4f4d6837117881a94023b23c7f91e125a7b2082335d081b9530ab52fd6d017882d243a91bfd67cda98b254',
-      };
+      navigate('/*');
+      return;
     }
 
     setPaymentData(data);
+    if (data?.vnp_TransactionStatus === '00') {
+      mutateCreatePackage(payload);
+    }
   }, []);
 
   const getStatusInfo = (responseCode, transactionStatus) => {
@@ -78,7 +93,7 @@ const Payment = () => {
     }
   };
 
-  if (!paymentData) {
+  if (!paymentData || isLoadingCreatePackage) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <Spin size="large" />

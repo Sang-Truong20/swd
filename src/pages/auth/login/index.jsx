@@ -52,12 +52,14 @@ function Login({ onSwitchToLogin }) {
         Cookies.set('refreshToken', refreshToken);
         const decoded = jwtDecode(accessToken);
         const role = decoded['role'];
+        const userId = decoded['userId'];
         if (role === 'ADMIN') {
           navigate(PATH_NAME.ADMIN);
         } else {
           navigate(PATH_NAME.HOME);
         }
         localStorage.setItem('isAuthenticated', true);
+        localStorage.setItem('userId', userId);
       }
     },
     onError: (err) => {
