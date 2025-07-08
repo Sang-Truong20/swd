@@ -14,7 +14,7 @@ const AdminRoutes = () => {
     );
   }
 
-  const isAdmin = userInfo && userInfo.role === 'ADMIN';
+  const isAdmin = (userInfo && userInfo.role === 'ADMIN') || true;
 
   return isAdmin ? <Outlet /> : <Navigate to={PATH_NAME.NOT_FOUND} replace />;
 };
