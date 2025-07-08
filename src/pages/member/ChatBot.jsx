@@ -345,6 +345,18 @@ const ChatBot = ({ onClose }) => {
               );
             }
 
+            const hasUsageLimit = item?.text?.includes('Số lượt còn lại');
+            let mainMessage = item?.text;
+            let usageLimitText = '';
+
+            if (hasUsageLimit) {
+              const parts = item.text.split('(Số lượt còn lại');
+              mainMessage = parts[0].trim();
+              if (parts[1]) {
+                usageLimitText = 'Số lượt còn lại' + parts[1].replace(')', '');
+              }
+            }
+
             return (
               <div
                 key={idx}
@@ -375,7 +387,7 @@ const ChatBot = ({ onClose }) => {
                     }`}
                   >
                     <p className="text-sm leading-relaxed break-words whitespace-pre-wrap">
-                      {item.text}
+                      {mainMessage}
                     </p>
                   </div>
                   <div
@@ -385,6 +397,17 @@ const ChatBot = ({ onClose }) => {
                   >
                     {item.time}
                   </div>
+                  {hasUsageLimit && (
+                    <div
+                      className={`text-xs text-gray-400 mt-1 px-2 ${
+                        item.sender === 'me' ? 'text-right' : ''
+                      }`}
+                    >
+                      <span className="opacity-70 italic">
+                        ({usageLimitText})
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             );
