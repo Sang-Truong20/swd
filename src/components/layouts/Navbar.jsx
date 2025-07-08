@@ -53,7 +53,7 @@ const Navbar = () => {
             </nav>
 
             <div className="flex items-center space-x-3">
-              {isAuthenticated ? (
+              {isAuthenticated || userInfo ? (
                 <>
                   <NotificationBell count={notificationCount} />
                   <div className="h-8 w-px bg-gray-300" />
@@ -71,7 +71,7 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center space-x-2 lg:hidden">
-            {isAuthenticated ? (
+            {isAuthenticated || userInfo ? (
               <>
                 <NotificationBell count={notificationCount} />
                 <UserMenu user={userInfo} onLogout={handleLogout} mobile />
