@@ -14,8 +14,8 @@ const MemberPage = lazy(() => import('../pages/member'));
 const MemberInfo = lazy(() => import('../pages/member/MemberInfo'));
 const ChangePassword = lazy(() => import('../pages/member/ChangePassword'));
 const PackageManager = lazy(() => import('../pages/member/PackageManager'));
-const ChatBotPage = lazy(() => import('../pages/member/ChatBot'));
 const AdminHome = lazy(() => import('../pages/admin'));
+
 const LawsList = lazy(() => import('../pages/laws/LawsList'));
 const LawDetail = lazy(() => import('../pages/laws/LawDetail'));
 
@@ -73,8 +73,8 @@ const router = createBrowserRouter([
             ],
           },
           {
-            path: PATH_NAME.CHAT_BOT,
-            element: withSuspense(ChatBotPage),
+            path: PATH_NAME.PAYMENT,
+            element: withSuspense(PaymentPage),
           },
         ],
       },

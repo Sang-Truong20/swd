@@ -1,114 +1,193 @@
-import { useState } from 'react';
-import { Form, Input, Button, message, Card, Row, Col } from 'antd';
+import { useMutation } from '@tanstack/react-query';
+import { Button, DatePicker, Form, Input } from 'antd';
+import dayjs from 'dayjs';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import UploadImage from '../../components/UploadImage';
+import { updateUserInfo } from '../../services/user';
+import { notify } from '../../utils';
 
 const initialUser = {
-  email: 'user@email.com',
-  name: 'Nguyễn Văn A',
-  birthday: '01/01/1990',
-  address: 'Hà Nội',
+  username: 'admin',
+  email: 'sangdev@gmail.com',
+  name: 'Trương Phước Sang',
+  birthday: '',
+  address: 'Hồ Chí Minh',
   phone: '0123456789',
+  avatarUrlText: '',
 };
 
 const MemberInfo = () => {
   const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
-  const [user, setUser] = useState(initialUser);
+  const [user] = useState(initialUser);
+  const userId = useMemo(() => '12cae9be-2b04-4144-a836-468d1449399a', []);
+  const [fileChange, setFileChange] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+
+  useEffect(() => {
+    if (initialUser) {
+      form.setFieldsValue({
+        ...initialUser,
+        avatarUrlText: fileChange,
+      });
+    }
+  }, [initialUser, fileChange, form]);
+
+  const { mutate: mutateUpdateUserInfo, isPending } = useMutation({
+    mutationFn: updateUserInfo,
+    onSuccess: () => {
+      notify('success', {
+        description: 'Cập nhật thông tin người dùng thành công',
+      });
+    },
+    onError: (err) => {
+      notify('error', { description: 'Lỗi hệ thống' });
+    },
+  });
 
   const onFinish = (values) => {
-    setLoading(true);
-    setTimeout(() => {
-      setUser(values);
-      setLoading(false);
-      message.success('Cập nhật thông tin thành công!');
-    }, 1200);
+    const payload = {
+      ...values,
+      birthday: values.birthday.format('YYYY-MM-DD'),
+    };
+    mutateUpdateUserInfo({ payload, userId });
   };
 
+  const handleFileChange = useCallback((newFileChange) => {
+    setFileChange(newFileChange);
+  }, []);
+
   return (
-    <Card
-      title={
-        <span className="text-xl font-bold text-blue-700">
-          Thông tin cơ bản
-        </span>
-      }
-      bordered={false}
-      className="shadow-xl rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50"
-      style={{ maxWidth: 600, margin: '0 auto' }}
-    >
+    <div className="space-y-6">
+      <div className="border-b border-gray-200 pb-4">
+        <h2 className="text-2xl font-bold text-gray-800">Thông tin cơ bản</h2>
+        <p className="text-gray-600 mt-2">
+          Quản lý thông tin tài khoản của bạn
+        </p>
+      </div>
+
       <Form
         form={form}
         layout="vertical"
         initialValues={user}
         onFinish={onFinish}
-        size="large"
-        className="pt-2"
+        className="max-w-4xl mx-auto p-6 bg-white rounded-lg"
       >
-        <Row gutter={16}>
-          <Col xs={24} sm={12}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <Form.Item
+              label="Tên đăng nhập"
+              name="username"
+              rules={[
+                { required: true, message: 'Vui lòng nhập tên đăng nhập' },
+              ]}
+            >
+              <Input
+                className="!py-3 !px-4 !text-base !rounded-lg !border-gray-300 focus:!border-blue-500"
+                defaultValue={'admin'}
+                placeholder="Nhập tên đăng nhập"
+              />
+            </Form.Item>
+
+            <Form.Item
+              label="Họ và tên"
+              name="name"
+              rules={[{ required: true, message: 'Vui lòng nhập họ và tên' }]}
+            >
+              <Input
+                className="!py-3 !px-4 !text-base !rounded-lg !border-gray-300 focus:!border-blue-500"
+                placeholder="Nhập họ và tên"
+              />
+            </Form.Item>
+
             <Form.Item
               label="Email"
               name="email"
               rules={[
-                { required: true, message: 'Vui lòng nhập email!' },
-                { type: 'email', message: 'Email không hợp lệ!' },
+                {
+                  required: true,
+                  type: 'email',
+                  message: 'Vui lòng nhập email hợp lệ',
+                },
               ]}
             >
-              <Input disabled className="bg-gray-100" />
+              <Input
+                className="!py-3 !px-4 !text-base !rounded-lg !border-gray-300 focus:!border-blue-500"
+                placeholder="example@email.com"
+              />
             </Form.Item>
-          </Col>
-          <Col xs={24} sm={12}>
-            <Form.Item
-              label="Họ và tên"
-              name="name"
-              rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }]}
-            >
-              <Input placeholder="Nhập họ và tên" />
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={12}>
-            <Form.Item
-              label="Ngày sinh"
-              name="birthday"
-              rules={[{ required: true, message: 'Vui lòng nhập ngày sinh!' }]}
-            >
-              <Input placeholder="dd/mm/yyyy" />
-            </Form.Item>
-          </Col>
-          <Col xs={24} sm={12}>
+
             <Form.Item
               label="Số điện thoại"
               name="phone"
               rules={[
-                { required: true, message: 'Vui lòng nhập số điện thoại!' },
+                { required: true, message: 'Vui lòng nhập số điện thoại' },
               ]}
             >
-              <Input placeholder="Nhập số điện thoại" />
+              <Input
+                className="!py-3 !px-4 !text-base !rounded-lg !border-gray-300 focus:!border-blue-500"
+                placeholder="0123456789"
+              />
             </Form.Item>
-          </Col>
-          <Col xs={24}>
+          </div>
+
+          <div className="space-y-4">
+            <Form.Item
+              label="Ngày sinh"
+              name="birthday"
+              rules={[{ required: true, message: 'Vui lòng chọn ngày sinh' }]}
+            >
+              <DatePicker
+                placeholder="Chọn ngày sinh"
+                format="YYYY/MM/DD"
+                size="large"
+                className="w-full !py-3 !px-4 !text-base !rounded-lg !border-gray-300 focus:!border-blue-500"
+                disabledDate={(current) => {
+                  return current && current >= dayjs().startOf('day');
+                }}
+              />
+            </Form.Item>
+
             <Form.Item
               label="Địa chỉ"
               name="address"
-              rules={[{ required: true, message: 'Vui lòng nhập địa chỉ!' }]}
+              rules={[{ required: true, message: 'Vui lòng nhập địa chỉ' }]}
             >
-              <Input placeholder="Nhập địa chỉ" />
+              <Input.TextArea
+                rows={4}
+                placeholder="Nhập địa chỉ đầy đủ"
+                className="!py-3 !px-4 !text-base !rounded-lg !border-gray-300 focus:!border-blue-500 !resize-none"
+              />
             </Form.Item>
-          </Col>
-        </Row>
-        <Form.Item className="text-center mt-6">
+
+            <Form.Item
+              name="avatarUrlText"
+              // rules={[{ required: true, message: 'Vui lòng chọn hình ảnh' }]}
+              className="flex w-full items-center justify-center"
+            >
+              <div className="flex w-full flex-col items-center">
+                <UploadImage
+                  titleButton="Thêm ảnh"
+                  initialImage={''}
+                  onFileChange={handleFileChange}
+                  onUploadingChange={(status) => setIsUploading(status)}
+                />
+              </div>
+            </Form.Item>
+          </div>
+        </div>
+        <div className="flex justify-start pt-8 border-t border-gray-200 mt-8">
           <Button
             type="primary"
             htmlType="submit"
-            loading={loading}
-            className="px-8 py-2 rounded-xl text-base font-semibold bg-gradient-to-r from-blue-500 to-indigo-600 border-0"
-            style={{
-              boxShadow: '0 4px 16px 0 rgba(56, 189, 248, 0.10)',
-            }}
+            loading={isPending || isUploading}
+            size="large"
+            className="!h-12 !px-8 !text-base !font-semibold !rounded-lg !bg-blue-600 hover:!bg-blue-700 !border-0 !shadow-md hover:!shadow-lg transition-all duration-200"
           >
-            Lưu thay đổi
+            Cập nhật thông tin
           </Button>
-        </Form.Item>
+        </div>
       </Form>
-    </Card>
+    </div>
   );
 };
 

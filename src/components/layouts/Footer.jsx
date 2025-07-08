@@ -1,4 +1,5 @@
 import React from 'react';
+import { FaBalanceScale } from 'react-icons/fa';
 
 const Footer = () => {
   return (
@@ -13,8 +14,8 @@ const Footer = () => {
         <div className="grid grid-cols-1 gap-8 px-6 py-12 md:grid-cols-2 lg:grid-cols-5 lg:py-16">
           <div className="lg:col-span-2 flex flex-col items-start space-y-6">
             <div className="flex items-center space-x-3">
-              <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-2xl transform hover:scale-105 transition-all duration-300">
-                <span className="text-white font-bold text-xl">SL</span>
+              <div className="w-14 h-14 bg-[#5b7aee] backdrop-blur rounded-2xl flex items-center justify-center">
+                <FaBalanceScale className="text-3xl !text-white" />
               </div>
               <div>
                 <span className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-white bg-clip-text text-transparent">
@@ -27,8 +28,8 @@ const Footer = () => {
             </div>
 
             <p className="text-slate-300 leading-relaxed max-w-md">
-              SmartLawGT cung cấp giải pháp công nghệ hàng đầu giúp bạn tra cứu, 
-              tìm hiểu và giải đáp mọi thắc mắc về pháp luật Việt Nam một cách 
+              SmartLawGT cung cấp giải pháp công nghệ hàng đầu giúp bạn tra cứu,
+              tìm hiểu và giải đáp mọi thắc mắc về pháp luật Việt Nam một cách
               nhanh chóng và chính xác.
             </p>
 

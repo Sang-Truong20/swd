@@ -1,48 +1,152 @@
 import { ArrowRightOutlined, CheckOutlined } from '@ant-design/icons';
-
-const packagesData = [
-  {
-    id: 1,
-    name: 'Free',
-    price: '0đ',
-    period: '/ Tháng',
-    description: 'Trải nghiệm cơ bản các tính năng của ứng dụng',
-    features: [
-      'Sử dụng các tính năng cơ bản',
-      'Hỗ trợ khách hàng 24/7',
-      'Truy cập không giới hạn nội dung miễn phí',
-    ],
-    buttonText: '🚀 Trải nghiệm ngay',
-    isPopular: false,
-  },
-  {
-    id: 2,
-    name: 'Premium',
-    price: '199.000đ',
-    period: '/ Tháng',
-    description: 'Mở khóa các tính năng nâng cao để có trải nghiệm tuyệt vời',
-    features: [
-      'Truy cập toàn bộ tính năng ứng dụng',
-      'Hỗ trợ khách hàng VIP',
-      'Không quảng cáo',
-      'Báo cáo chi tiết và phân tích',
-      'Tích hợp API không giới hạn',
-    ],
-    buttonText: '🚀 Nâng cấp ngay',
-    isPopular: true,
-  },
-];
+import { useMutation } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { PATH_NAME } from '../constants';
+import { payment } from '../services/package';
+import { notify } from '../utils';
 
 const Packages = () => {
-  const handleUpGradePackage = () => {
-    alert('Chức năng nâng cấp gói dịch vụ sẽ sớm được cập nhật!');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const isAuthenticated = localStorage.getItem('isAuthenticated');
+  const navigate = useNavigate();
+  const apiData = [
+    {
+      get_id: '1',
+      usagePackageId: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
+      name: 'Gói Cơ Bản',
+      description: '50 token',
+      price: 59000,
+      dailyLimit: 50,
+      daysLimit: 30,
+      isEnable: true,
+      createdDate: '2025-07-05T05:12:58.674Z',
+      updatedDate: '2025-07-05T05:12:58.674Z',
+    },
+    {
+      get_id: '2',
+      usagePackageId: '3fa85f64-5717-4562-b3fc-2c963f66afa7',
+      name: 'Gói Nâng Cao',
+      description: '100 token',
+      price: 199000,
+      dailyLimit: 100,
+      daysLimit: 30,
+      isEnable: true,
+      createdDate: '2025-07-05T05:12:58.674Z',
+      updatedDate: '2025-07-05T05:12:58.674Z',
+    },
+    {
+      get_id: '3',
+      usagePackageId: '3fa85f64-5717-4562-b3fc-2c963f66afa8',
+      name: 'Gói Vip',
+      description: '200 token',
+      price: 399000,
+      dailyLimit: 200,
+      daysLimit: 30,
+      isEnable: true,
+      createdDate: '2025-07-05T05:12:58.674Z',
+      updatedDate: '2025-07-05T05:12:58.674Z',
+    },
+  ];
+
+  const packagesData = apiData.map((item, index) => {
+    const packageConfig = {
+      0: {
+        period: '/ Tháng',
+        description: 'Trải nghiệm cơ bản các tính năng của ứng dụng',
+        features: [
+          'Sử dụng các tính năng cơ bản',
+          'Hỗ trợ khách hàng 24/7',
+          'Truy cập không giới hạn nội dung miễn phí',
+          `Giới hạn ${item.description} mỗi ngày`,
+        ],
+        buttonText: '🚀 Trải nghiệm ngay',
+        isPopular: false,
+      },
+      1: {
+        period: '/ Tháng',
+        description:
+          'Mở khóa các tính năng nâng cao để có trải nghiệm tuyệt vời',
+        features: [
+          'Truy cập toàn bộ tính năng ứng dụng',
+          'Hỗ trợ khách hàng VIP',
+          'Không quảng cáo',
+          'Báo cáo chi tiết và phân tích',
+          `Giới hạn ${item.description} mỗi ngày`,
+        ],
+        buttonText: '🚀 Trải nghiệm ngay',
+        isPopular: true,
+      },
+      2: {
+        period: '/ Tháng',
+        description: 'Gói cao cấp với nhiều tính năng độc quyền',
+        features: [
+          'Truy cập toàn bộ tính năng cao cấp',
+          'Hỗ trợ khách hàng Premium 24/7',
+          'Không quảng cáo',
+          'Báo cáo chi tiết và phân tích nâng cao',
+          'Tích hợp API không giới hạn',
+          `Giới hạn ${item.description} mỗi ngày`,
+        ],
+        buttonText: '🚀 Trải nghiệm ngay',
+        isPopular: false,
+      },
+    };
+
+    const config = packageConfig[index] || packageConfig[0];
+
+    return {
+      id: item.get_id,
+      name: item.name,
+      price: item.price === 0 ? '0đ' : `${item.price.toLocaleString('vi-VN')}đ`,
+      period: config.period,
+      description: config.description,
+      features: config.features,
+      buttonText: config.buttonText,
+      isPopular: config.isPopular,
+      apiData: item,
+    };
+  });
+
+  const { mutate: mutatePayment, isPending } = useMutation({
+    mutationFn: payment,
+    onSuccess: (res) => {
+      const rawString = res?.data;
+      const url = rawString.replace(/^redirect:/, '');
+      window.location.href = url;
+    },
+    onError: (err) => {
+      console.log('Payment error:', err);
+      notify('error', { description: 'Lỗi hệ thống' });
+    },
+  });
+
+  const handleUpGradePackage = (pkg) => {
+    if (isProcessing) return;
+    if (!isAuthenticated) {
+      navigate(PATH_NAME.AUTH);
+      notify('info', {
+        description: 'Vui lòng đăng nhập trước khi mua gói dịch vụ',
+      });
+      return;
+    }
+
+    const payload = {
+      amount: pkg.apiData.price,
+      orderInfo: `Thanh toán ${pkg.name} - ${pkg.apiData.description}`,
+      transactionMethod: 'VNPAY',
+      usagePackageId: pkg.apiData.usagePackageId,
+    };
+
+    setIsProcessing(true);
+    mutatePayment(payload);
   };
 
   return (
     <section className="relative py-20 px-6 overflow-hidden bg-gray-50">
       <div className="relative max-w-6xl mx-auto">
         <div className="text-center mb-16">
-          <h1 className="text-3xl md:text-4xl font-bold  bg-clip-text mb-4">
+          <h1 className="text-3xl md:text-4xl font-bold bg-clip-text mb-4">
             Gói Dịch Vụ
           </h1>
 
@@ -52,18 +156,18 @@ const Packages = () => {
           </p>
         </div>
 
-        <div className="grid gap-8 md:grid-cols-2 lg:gap-12 max-w-4xl mx-auto">
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 lg:gap-8 max-w-6xl mx-auto">
           {packagesData.map((pkg) => (
             <div
               key={pkg.id}
-              className={`relative group flex flex-col rounded-3xl p-8 transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 ${
+              className={`relative group flex flex-col rounded-3xl p-8 transition-all duration-500 transform hover:scale-105 hover:-translate-y-2 will-change-transform ${
                 pkg.isPopular
                   ? 'bg-gradient-to-br from-blue-600 via-blue-700 to-purple-700 text-white shadow-2xl shadow-blue-500/30 border-2 border-blue-400'
                   : 'bg-white/90 backdrop-blur-sm text-gray-800 shadow-xl shadow-gray-200/50 border border-gray-200/50 hover:shadow-2xl hover:shadow-blue-200/30'
               }`}
             >
               {pkg.isPopular && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-orange-400 to-pink-500 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg">
+                <div className="absolute w-[190px] -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-orange-400 to-pink-500 text-white px-6 py-2 rounded-full text-sm font-bold shadow-lg">
                   ⭐ PHỔ BIẾN NHẤT
                 </div>
               )}
@@ -114,12 +218,13 @@ const Packages = () => {
               </div>
 
               <button
-                onClick={handleUpGradePackage}
+                onClick={() => handleUpGradePackage(pkg)}
+                disabled={isProcessing}
                 className={`relative cursor-pointer w-full py-4 px-6 rounded-2xl font-bold text-base transition-all duration-300 transform active:scale-95 overflow-hidden group ${
                   pkg.isPopular
                     ? 'bg-white text-blue-700 hover:bg-blue-50 shadow-lg hover:shadow-xl'
                     : 'bg-blue-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl'
-                }`}
+                } ${isPending ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 <span className="relative z-10 flex items-center justify-center gap-2">
                   {pkg.buttonText}

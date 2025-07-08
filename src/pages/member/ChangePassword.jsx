@@ -1,4 +1,4 @@
-import { Form, Input, Button, Card, message } from 'antd';
+import { Button, Form, Input, message } from 'antd';
 import { useState } from 'react';
 
 const ChangePassword = () => {
@@ -16,88 +16,81 @@ const ChangePassword = () => {
   };
 
   return (
-    <Card
-      title={
-        <span className="text-xl font-bold text-blue-700">Đổi mật khẩu</span>
-      }
-      bordered={false}
-      className="shadow-xl rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50"
-      style={{ maxWidth: 480, margin: '0 auto' }}
-    >
+    <div className="space-y-6">
+      <div className="border-b border-gray-200 pb-4">
+        <h2 className="text-2xl font-bold text-gray-800">Đổi mật khẩu</h2>
+        <p className="text-gray-600 mt-2">
+          Cập nhật mật khẩu để bảo mật tài khoản
+        </p>
+      </div>
+
       <Form
         form={form}
         layout="vertical"
         onFinish={onFinish}
-        size="large"
-        className="pt-2"
+        className="max-w-md space-y-4"
       >
         <Form.Item
-          label="Mật khẩu cũ"
-          name="oldPassword"
-          rules={[{ required: true, message: 'Vui lòng nhập mật khẩu cũ!' }]}
+          label="Mật khẩu hiện tại"
+          name="currentPassword"
+          rules={[
+            { required: true, message: 'Vui lòng nhập mật khẩu hiện tại' },
+          ]}
         >
           <Input.Password
-            placeholder="Nhập mật khẩu cũ"
-            autoComplete="current-password"
+            className="!py-3 !px-4 !text-base !rounded-lg"
+            placeholder="Nhập mật khẩu hiện tại"
           />
         </Form.Item>
         <Form.Item
           label="Mật khẩu mới"
           name="newPassword"
           rules={[
-            { required: true, message: 'Vui lòng nhập mật khẩu mới!' },
-            { min: 8, message: 'Mật khẩu phải có ít nhất 8 ký tự!' },
+            { required: true, message: 'Vui lòng nhập mật khẩu mới' },
+            { min: 8, message: 'Mật khẩu phải có ít nhất 8 ký tự' },
           ]}
         >
           <Input.Password
+            className="!py-3 !px-4 !text-base !rounded-lg"
             placeholder="Nhập mật khẩu mới"
-            autoComplete="new-password"
           />
         </Form.Item>
         <Form.Item
-          label="Nhập lại mật khẩu mới"
+          label="Xác nhận mật khẩu mới"
           name="confirmPassword"
           dependencies={['newPassword']}
           rules={[
-            { required: true, message: 'Vui lòng nhập lại mật khẩu mới!' },
+            { required: true, message: 'Vui lòng xác nhận mật khẩu mới' },
             ({ getFieldValue }) => ({
               validator(_, value) {
                 if (!value || getFieldValue('newPassword') === value) {
                   return Promise.resolve();
                 }
                 return Promise.reject(
-                  new Error('Mật khẩu nhập lại không khớp!'),
+                  new Error('Mật khẩu xác nhận không khớp!'),
                 );
               },
             }),
           ]}
         >
           <Input.Password
-            placeholder="Nhập lại mật khẩu mới"
-            autoComplete="new-password"
+            className="!py-3 !px-4 !text-base !rounded-lg"
+            placeholder="Xác nhận mật khẩu mới"
           />
         </Form.Item>
-        <Form.Item className="text-center mt-6">
+        <div className="flex justify-start pt-8 border-t border-gray-200 mt-8">
           <Button
             type="primary"
             htmlType="submit"
             loading={loading}
-            className="px-8 py-2 rounded-xl text-base font-semibold border-0"
-            style={{
-              boxShadow: '0 4px 16px 0 rgba(56, 189, 248, 0.10)',
-            }}
+            size="large"
+            className="!h-12 !px-8 !text-base !font-semibold !rounded-lg !bg-blue-600 hover:!bg-blue-700 !border-0 !shadow-md hover:!shadow-lg transition-all duration-200"
           >
             Đổi mật khẩu
           </Button>
-        </Form.Item>
+        </div>
       </Form>
-      <div className="mt-8 p-4 bg-amber-50 rounded-xl border border-amber-200 shadow-sm">
-        <p className="text-amber-800 text-sm">
-          <strong>Lưu ý:</strong> Mật khẩu mới phải có ít nhất 8 ký tự, bao gồm
-          chữ hoa, chữ thường và số.
-        </p>
-      </div>
-    </Card>
+    </div>
   );
 };
 

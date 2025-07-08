@@ -1,7 +1,8 @@
 import axios from 'axios';
+import Cookies from 'js-cookie';
+import { refresh } from '../services/auth';
 
 const axiosClient = axios.create({
-  // Sử dụng proxy thay vì direct call để tránh CORS
   baseURL: import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? '' : 'http://localhost:8080'),
   headers: {
     'Content-Type': 'application/json',
@@ -31,7 +32,7 @@ axiosClient.interceptors.request.use(
     return config;
   },
   (err) => {
-    console.error('❌ Request Error:', err);
+    console.error('Request Error:', err);
     return Promise.reject(err);
   },
 );
@@ -39,7 +40,7 @@ axiosClient.interceptors.request.use(
 axiosClient.interceptors.response.use(
   (response) => {
     // Log successful response
-    console.log('✅ API Response:', {
+    console.log('API Response:', {
       status: response.status,
       url: response.config.url,
       data: response.data
@@ -48,7 +49,7 @@ axiosClient.interceptors.response.use(
   },
   async (error) => {
     // Log error response
-    console.error('❌ API Error:', {
+    console.error('API Error:', {
       status: error.response?.status,
       url: error.config?.url,
       message: error.response?.data?.message || error.message,
@@ -57,7 +58,7 @@ axiosClient.interceptors.response.use(
 
     // Handle 401 (Unauthorized) - token expired or invalid
     if (error.response?.status === 401) {
-      console.warn('🔐 Token expired or invalid, clearing auth data');
+      console.warn('Token expired or invalid, clearing auth data');
       localStorage.removeItem('authToken');
       sessionStorage.removeItem('authToken');
       // Redirect to login if not already there
@@ -68,9 +69,10 @@ axiosClient.interceptors.response.use(
 
     // Handle 403 (Forbidden) - insufficient permissions
     if (error.response?.status === 403) {
-      console.warn('🚫 Access denied - insufficient permissions');
+      console.warn('Access denied - insufficient permissions');
       // You might want to show a permission denied message
       // or redirect to a different page
+
     }
 
     return Promise.reject(error);
