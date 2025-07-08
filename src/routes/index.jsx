@@ -16,8 +16,8 @@ const ChangePassword = lazy(() => import('../pages/member/ChangePassword'));
 const PackageManager = lazy(() => import('../pages/member/PackageManager'));
 const ChatBotPage = lazy(() => import('../pages/member/ChatBot'));
 const AdminHome = lazy(() => import('../pages/admin'));
-const Post = lazy(() => import('../pages/post'));
-const PostDetail = lazy(() => import('../pages/post/detail'));
+const LawsList = lazy(() => import('../pages/laws/LawsList'));
+const LawDetail = lazy(() => import('../pages/laws/LawDetail'));
 
 const withSuspense = (Component) => (
   <Suspense
@@ -44,12 +44,12 @@ const router = createBrowserRouter([
         element: withSuspense(LandingPage),
       },
       {
-        path: PATH_NAME.POST,
-        element: withSuspense(Post),
+        path: PATH_NAME.LAWS,
+        element: withSuspense(LawsList),
       },
       {
-        path: PATH_NAME.POST_DETAIL,
-        element: withSuspense(PostDetail),
+        path: PATH_NAME.LAW_DETAIL,
+        element: withSuspense(LawDetail),
       },
       {
         element: <MemberRoutes />,
