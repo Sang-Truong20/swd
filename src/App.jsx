@@ -1,3 +1,4 @@
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { App as AntdApp } from 'antd';
 import { RouterProvider } from 'react-router-dom';
@@ -23,7 +24,9 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AntdApp>
-        <RouterProvider router={router} />
+        <GoogleOAuthProvider clientId={import.meta.env.VITE_CLIENT_ID}>
+          <RouterProvider router={router} />
+        </GoogleOAuthProvider>
       </AntdApp>
     </QueryClientProvider>
   );

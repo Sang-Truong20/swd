@@ -16,4 +16,16 @@ const me = (userId) => {
   return axiosClient.get(`/query/users/userId/${userId}`);
 };
 
-export { login, refresh, register, me };
+const loginGoogle = (payload) => {
+  return axiosClient.post(`/query/auth/login`, payload);
+};
+
+const receiveOTP = (email) => {
+  return axiosClient.post(`/otp/send?email=${email}`);
+};
+
+const verifyAccount = ({ email, otp }) => {
+  return axiosClient.post(`/otp/verify?email=${email}&otp=${otp}`);
+};
+
+export { login, loginGoogle, me, receiveOTP, refresh, register, verifyAccount };
