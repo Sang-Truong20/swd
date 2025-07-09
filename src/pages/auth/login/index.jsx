@@ -5,6 +5,7 @@ import {
   SafetyOutlined,
   UserOutlined,
 } from '@ant-design/icons';
+import { useGoogleLogin } from '@react-oauth/google';
 import { useMutation } from '@tanstack/react-query';
 import { Button, Checkbox, Form, Input } from 'antd';
 import Cookies from 'js-cookie';
@@ -12,7 +13,7 @@ import { jwtDecode } from 'jwt-decode';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { PATH_NAME } from '../../../constants';
-import { login } from '../../../services/auth';
+import { login, loginGoogle } from '../../../services/auth';
 import { notify } from '../../../utils';
 
 function Login({ onSwitchToLogin }) {
@@ -71,6 +72,39 @@ function Login({ onSwitchToLogin }) {
     },
   });
 
+  const { mutate: mutateLoginGoogle, isPending: isLoadingLoginGoogle } =
+    useMutation({
+      mutationFn: loginGoogle,
+      onSuccess: (res) => {
+        notify('success', { description: 'Đăng nhập thành công' });
+
+        const accessToken = res?.data?.accessToken;
+        const refreshToken = res?.data?.refreshToken;
+
+        if (accessToken && refreshToken) {
+          Cookies.set('accessToken', accessToken);
+          Cookies.set('refreshToken', refreshToken);
+          const decoded = jwtDecode(accessToken);
+          const role = decoded['role'];
+          const userId = decoded['userId'];
+          if (role === 'ADMIN') {
+            navigate(PATH_NAME.ADMIN);
+          } else {
+            navigate(PATH_NAME.HOME);
+          }
+          localStorage.setItem('isAuthenticated', true);
+          localStorage.setItem('userId', userId);
+        }
+      },
+      onError: (err) => {
+        if (err && err.status === 401) {
+          notify('error', { description: 'Thông tin đăng nhập không hợp lệ' });
+          return;
+        }
+        notify('error', { description: 'Lỗi hệ thống' });
+      },
+    });
+
   const handleSubmit = async (values) => {
     if (values.rememberMe) {
       const credentialsToSave = {
@@ -87,6 +121,10 @@ function Login({ onSwitchToLogin }) {
 
     loginMutate(values);
   };
+
+  const handleLoginGoogle = useGoogleLogin({
+    onSuccess: (tokenResponse) => mutateLoginGoogle(tokenResponse),
+  });
 
   return (
     <div className="bg-white relative rounded-2xl shadow-xl p-5 md:p-8">
@@ -182,7 +220,7 @@ function Login({ onSwitchToLogin }) {
         <Button
           type="primary"
           htmlType="submit"
-          loading={isPending}
+          loading={isPending || isLoadingLoginGoogle}
           className="w-full !h-12 !text-base !font-semibold !border-0 !rounded-lg"
           size="large"
         >
@@ -193,7 +231,11 @@ function Login({ onSwitchToLogin }) {
           <span className="text-[#999999]">hoặc</span>
           <div className="ml-2 h-[1px] w-full bg-[#e6e8eb]"></div>
         </div>
-        <Button className="mx-auto mt-5 block !h-12 w-full rounded-[5px] border border-gray-300 py-5 bg-[#fff] text-[grey] shadow-none hover:!border-primary hover:!bg-transparent hover:!text-primary">
+        <Button
+          onClick={() => handleLoginGoogle()}
+          loading={isPending || isLoadingLoginGoogle}
+          className="mx-auto mt-5 block !h-12 w-full rounded-[5px] border border-gray-300 py-5 bg-[#fff] text-[grey] shadow-none hover:!border-primary hover:!bg-transparent hover:!text-primary"
+        >
           <div className="flex items-center justify-center tracking-wider">
             <img
               src="https://freesvg.org/img/1534129544.png"
