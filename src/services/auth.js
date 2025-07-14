@@ -17,7 +17,7 @@ const me = (userId) => {
 };
 
 const loginGoogle = (payload) => {
-  return axiosClient.post(`/query/auth/login`, payload);
+  return axiosClient.post(`/auth/google`, payload);
 };
 
 const receiveOTP = (email) => {
