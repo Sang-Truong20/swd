@@ -28,4 +28,19 @@ const verifyAccount = ({ email, otp }) => {
   return axiosClient.post(`/otp/verify?email=${email}&otp=${otp}`);
 };
 
-export { login, loginGoogle, me, receiveOTP, refresh, register, verifyAccount };
+const resetPassword = ({ email, newPassword }) => {
+  return axiosClient.put(
+    `/command/user/reset-password?email=${email}&newPassword=${newPassword}`,
+  );
+};
+
+export {
+  login,
+  loginGoogle,
+  me,
+  receiveOTP,
+  refresh,
+  register,
+  resetPassword,
+  verifyAccount,
+};

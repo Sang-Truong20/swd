@@ -12,7 +12,7 @@ import { Button, DatePicker, Drawer, Form, Input, Typography } from 'antd';
 import dayjs from 'dayjs';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { register, verifyAccount } from '../../../services/auth';
+import { receiveOTP, register, verifyAccount } from '../../../services/auth';
 import { notify } from '../../../utils';
 
 function Register({ onSwitchToLogin }) {
@@ -23,36 +23,55 @@ function Register({ onSwitchToLogin }) {
   const [otpDrawerOpen, setOtpDrawerOpen] = useState(false);
   const [otp, setOtp] = useState('');
   const [otpLoading, setOtpLoading] = useState(false);
+  const [registerInfo, setRegisterInfo] = useState(null);
 
-  const { mutate: registerMutate, isPending } = useMutation({
-    mutationFn: register,
-    onSuccess: () => {
-      notify('success', {
-        description:
-          'Mã OTP đã được gửi. Vui lòng kiểm tra hòm thư (hoặc Thư rác) để lấy mã OTP',
-      });
-      setOtpDrawerOpen(true);
-    },
-    onError: () => {
-      notify('error', { description: 'Lỗi hệ thống' });
-    },
-  });
-
-  const { mutate: mutateVerifyAccount, isPending: isLoadingVerifyAccount } =
+  // B1: gửi email -> nhận OTP
+  const { mutate: mutateReceiveOtp, isPending: isLoadingReceiveOtp } =
     useMutation({
-      mutationFn: verifyAccount,
+      mutationFn: receiveOTP,
       onSuccess: () => {
-        setOtp('');
-        setOtpDrawerOpen(false);
-        onSwitchToLogin();
+        setOtpDrawerOpen(true);
         notify('success', {
-          description: 'Đăng ký thành công. Vui lòng đăng nhập để vào hệ thống',
+          description:
+            'Mã OTP đã được gửi. Vui lòng kiểm tra hòm thư (hoặc Thư rác) để lấy mã OTP',
         });
       },
       onError: (err) => {
         notify('error', { description: err.response.data });
       },
     });
+
+  // B2: xác minh OTP + đăng kí tài khoản
+  const { mutate: mutateVerifyAccount, isPending: isLoadingVerifyAccount } =
+    useMutation({
+      mutationFn: verifyAccount,
+      onSuccess: () => {
+        setOtp('');
+        mutateRegister(registerInfo);
+      },
+      onError: (err) => {
+        if (err.response && err.response.data === 'OTP invalid or expired') {
+          notify('error', { description: 'OTP không hợp lệ hoặc đã hết hạn' });
+          return;
+        }
+        notify('error', { description: err.response.data });
+      },
+    });
+
+  // đăng ký tài khoản
+  const { mutate: mutateRegister } = useMutation({
+    mutationFn: register,
+    onSuccess: () => {
+      setOtpDrawerOpen(false);
+      notify('success', {
+        description: 'Đăng ký thành công. Vui lòng đăng nhập để vào hệ thống',
+      });
+      onSwitchToLogin();
+    },
+    onError: () => {
+      notify('error', { description: 'Lỗi hệ thống' });
+    },
+  });
 
   const handleOtpConfirm = () => {
     if (otp.length !== 6) {
@@ -66,6 +85,7 @@ function Register({ onSwitchToLogin }) {
       otp,
     };
 
+    // fake loading để tránh spam
     setOtpLoading(true);
     setTimeout(() => {
       setOtpLoading(false);
@@ -84,8 +104,9 @@ function Register({ onSwitchToLogin }) {
       ...rest,
       birthday: values.birthday.format('YYYY-MM-DD'),
     };
-
-    registerMutate(payload);
+    // lưu thông tin đăng ký để tạo tài khoản sau khi xác minh OTP
+    setRegisterInfo(payload);
+    mutateReceiveOtp(payload.email);
   };
 
   return (
@@ -227,7 +248,7 @@ function Register({ onSwitchToLogin }) {
                   return Promise.resolve();
                 }
                 return Promise.reject(
-                  new Error('Mật khẩu xác nhận không khớp!'),
+                  new Error('Mật khẩu xác nhận không khớp'),
                 );
               },
             }),
@@ -255,7 +276,7 @@ function Register({ onSwitchToLogin }) {
         <Button
           type="primary"
           htmlType="submit"
-          loading={isPending}
+          loading={isLoadingReceiveOtp}
           className="w-full mt-5 flex justify-center items-center !h-12 !text-lg !font-semibold !border-0 !rounded-lg"
           size="large"
         >
@@ -273,6 +294,7 @@ function Register({ onSwitchToLogin }) {
         </div>
       </Form>
 
+      {/* xử lý overlay cho form OTP */}
       <Drawer
         title={null}
         placement="bottom"

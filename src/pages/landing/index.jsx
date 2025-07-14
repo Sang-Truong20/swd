@@ -157,7 +157,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      <Packages></Packages>
+      <Packages />
 
       {/* Statistics Section */}
       <section className="py-16 bg-gradient-to-r from-blue-600 to-indigo-700">

@@ -23,6 +23,7 @@ function Login({ onSwitchToLogin, onForgotPassword }) {
 
   const togglePassword = () => setShowPassword((prev) => !prev);
 
+  // tải thông tin đăng nhập đã lưu nếu có (trong localStorage)
   useEffect(() => {
     const savedCredentials = localStorage.getItem('rememberedCredentials');
     if (savedCredentials) {
@@ -40,6 +41,7 @@ function Login({ onSwitchToLogin, onForgotPassword }) {
     }
   }, [form]);
 
+  // đăng nhập
   const { mutate: loginMutate, isPending } = useMutation({
     mutationFn: login,
     onSuccess: (res) => {
@@ -48,6 +50,7 @@ function Login({ onSwitchToLogin, onForgotPassword }) {
       const accessToken = res?.data?.accessToken;
       const refreshToken = res?.data?.refreshToken;
 
+      // nếu có accessToken và refreshToken thì lưu vào cookie và điều hướng
       if (accessToken && refreshToken) {
         Cookies.set('accessToken', accessToken);
         Cookies.set('refreshToken', refreshToken);
@@ -59,7 +62,6 @@ function Login({ onSwitchToLogin, onForgotPassword }) {
         } else {
           navigate(PATH_NAME.HOME);
         }
-        localStorage.setItem('isAuthenticated', true);
         localStorage.setItem('userId', userId);
       }
     },
@@ -72,9 +74,11 @@ function Login({ onSwitchToLogin, onForgotPassword }) {
     },
   });
 
+  // đăng nhập bằng Google
   const { mutate: mutateLoginGoogle, isPending: isLoadingLoginGoogle } =
     useMutation({
       mutationFn: loginGoogle,
+      // xử lý thành công đăng nhập tương tự login thường
       onSuccess: (res) => {
         notify('success', { description: 'Đăng nhập thành công' });
 
@@ -92,7 +96,6 @@ function Login({ onSwitchToLogin, onForgotPassword }) {
           } else {
             navigate(PATH_NAME.HOME);
           }
-          localStorage.setItem('isAuthenticated', true);
           localStorage.setItem('userId', userId);
         }
       },
@@ -106,6 +109,7 @@ function Login({ onSwitchToLogin, onForgotPassword }) {
     });
 
   const handleSubmit = async (values) => {
+    // nếu chọn "Ghi nhớ đăng nhập" thì lưu vào localStorage
     if (values.rememberMe) {
       const credentialsToSave = {
         email: values.email,
@@ -221,12 +225,13 @@ function Login({ onSwitchToLogin, onForgotPassword }) {
           <div className="ml-2 h-[1px] w-full bg-[#e6e8eb]"></div>
         </div>
         <div className="mt-5">
+          {/* xử lý login google bằng react-oauth/google */}
           <GoogleLogin
             theme="outline"
             size="large"
             width="100%"
             onSuccess={(credentialResponse) => {
-              console.log('cgekc credentialResponse', credentialResponse);
+              // lấy idToken gửi cho backend
               mutateLoginGoogle({ idToken: credentialResponse?.credential });
             }}
             onError={() => {

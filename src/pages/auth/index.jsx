@@ -1,13 +1,14 @@
-import { CarOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined } from '@ant-design/icons';
 import { useState } from 'react';
 import { FaBalanceScale } from 'react-icons/fa';
+import ForgotPassword from './forgot';
 import Login from './login';
 import Register from './register';
-import ForgotPassword from './forgot';
 
 function AuthPage() {
   const [formType, setFormType] = useState('login');
 
+  // xử lý chuyển đổi giữa các form
   const renderForm = () => {
     switch (formType) {
       case 'login':
@@ -110,7 +111,7 @@ function AuthPage() {
           <div className="lg:hidden mb-8 text-center">
             <div className="flex items-center justify-center gap-3 mb-4">
               <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center">
-                <CarOutlined className="text-2xl !text-white" />
+                <FaBalanceScale className="text-3xl !text-white" />
               </div>
               <h1 className="text-2xl font-bold text-gray-800">SmartLawGT</h1>
             </div>

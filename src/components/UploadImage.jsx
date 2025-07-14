@@ -3,14 +3,7 @@ import { Image, Upload, message } from 'antd';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { memo, useEffect, useState } from 'react';
 import { storage } from '../configs/firebase';
-
-const getBase64 = (file) =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = (error) => reject(error);
-  });
+import { getBase64 } from '../utils';
 
 const UploadImage = (props) => {
   const { onFileChange, initialImage, titleButton, onUploadingChange } = props;
@@ -20,16 +13,19 @@ const UploadImage = (props) => {
   const [fileChange, setFileChange] = useState('');
   const [uploading, setUploading] = useState(false);
 
+  // gọi callback ra ngoài khi trạng thái upload thay đổi
   useEffect(() => {
     if (onUploadingChange) {
       onUploadingChange(uploading);
     }
   }, [uploading, onUploadingChange]);
 
+  // gọi callback ra ngoài khi file thay đổi (trả về url ảnh)
   useEffect(() => {
     onFileChange(fileChange);
   }, [fileChange, onFileChange]);
 
+  // nếu có ảnh khởi tạo thì set vào state
   useEffect(() => {
     if (initialImage) {
       setFile({
@@ -42,6 +38,7 @@ const UploadImage = (props) => {
     }
   }, [initialImage]);
 
+  // cử lý khi click preview ảnh
   const handlePreview = async (file) => {
     if (!file.url && !file.preview) {
       file.preview = await getBase64(file.originFileObj);
@@ -51,6 +48,7 @@ const UploadImage = (props) => {
     setPreviewOpen(true);
   };
 
+  // xử lý khi chọn file mới hoặc xóa file
   const handleChange = async ({ fileList: newFileList }) => {
     const newFile = newFileList.length ? newFileList[0] : null;
     setFile(newFile);
@@ -62,11 +60,13 @@ const UploadImage = (props) => {
       return;
     }
 
+    // nếu có file mới thì upload lên firebase
     if (newFile && newFile.originFileObj) {
       try {
         setUploading(true);
         message.loading({ content: 'Đang tải ảnh lên...', key: 'uploading' });
 
+        // tạo đường dẫn lưu trữ trên firebase
         const storageRef = ref(
           storage,
           `/SmartLawGT/${Date.now()}_${newFile.name}`,
@@ -79,7 +79,7 @@ const UploadImage = (props) => {
         setFileChange(downloadURL);
 
         message.success({
-          content: 'Tải ảnh lên thành côngs',
+          content: 'Tải ảnh lên thành công',
           key: 'uploading',
         });
       } catch (error) {

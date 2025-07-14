@@ -8,6 +8,7 @@ const tabs = [
   { label: 'Quản lý package', path: 'package', icon: Package },
 ];
 
+// xứ lý layout để tránh render lại toàn bộ component khi chuyển tab
 const MemberPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
