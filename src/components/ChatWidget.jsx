@@ -8,12 +8,11 @@ import { notify } from '../utils';
 
 const ChatWidget = ({ hasPackage = true }) => {
   const [open, setOpen] = useState(false);
-  const isAuthenticated = localStorage.getItem('isAuthenticated');
   const { userInfo } = useUserData();
   const navigate = useNavigate();
 
   const handleOpen = () => {
-    if (!isAuthenticated && !userInfo) {
+    if (!userInfo) {
       navigate(PATH_NAME.AUTH);
       notify('info', {
         description: 'Vui lòng đăng nhập trước khi sử dụng dịch vụ',

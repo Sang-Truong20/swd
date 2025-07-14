@@ -2,10 +2,10 @@ import {
   EyeInvisibleOutlined,
   EyeOutlined,
   LockOutlined,
+  MailOutlined,
   SafetyOutlined,
-  UserOutlined,
 } from '@ant-design/icons';
-import { useGoogleLogin } from '@react-oauth/google';
+import { GoogleLogin } from '@react-oauth/google';
 import { useMutation } from '@tanstack/react-query';
 import { Button, Checkbox, Form, Input } from 'antd';
 import Cookies from 'js-cookie';
@@ -16,13 +16,14 @@ import { PATH_NAME } from '../../../constants';
 import { login, loginGoogle } from '../../../services/auth';
 import { notify } from '../../../utils';
 
-function Login({ onSwitchToLogin }) {
+function Login({ onSwitchToLogin, onForgotPassword }) {
   const [form] = Form.useForm();
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const togglePassword = () => setShowPassword((prev) => !prev);
 
+  // tải thông tin đăng nhập đã lưu nếu có (trong localStorage)
   useEffect(() => {
     const savedCredentials = localStorage.getItem('rememberedCredentials');
     if (savedCredentials) {
@@ -40,6 +41,7 @@ function Login({ onSwitchToLogin }) {
     }
   }, [form]);
 
+  // đăng nhập
   const { mutate: loginMutate, isPending } = useMutation({
     mutationFn: login,
     onSuccess: (res) => {
@@ -48,6 +50,7 @@ function Login({ onSwitchToLogin }) {
       const accessToken = res?.data?.accessToken;
       const refreshToken = res?.data?.refreshToken;
 
+      // nếu có accessToken và refreshToken thì lưu vào cookie và điều hướng
       if (accessToken && refreshToken) {
         Cookies.set('accessToken', accessToken);
         Cookies.set('refreshToken', refreshToken);
@@ -59,7 +62,6 @@ function Login({ onSwitchToLogin }) {
         } else {
           navigate(PATH_NAME.HOME);
         }
-        localStorage.setItem('isAuthenticated', true);
         localStorage.setItem('userId', userId);
       }
     },
@@ -72,9 +74,11 @@ function Login({ onSwitchToLogin }) {
     },
   });
 
+  // đăng nhập bằng Google
   const { mutate: mutateLoginGoogle, isPending: isLoadingLoginGoogle } =
     useMutation({
       mutationFn: loginGoogle,
+      // xử lý thành công đăng nhập tương tự login thường
       onSuccess: (res) => {
         notify('success', { description: 'Đăng nhập thành công' });
 
@@ -92,7 +96,6 @@ function Login({ onSwitchToLogin }) {
           } else {
             navigate(PATH_NAME.HOME);
           }
-          localStorage.setItem('isAuthenticated', true);
           localStorage.setItem('userId', userId);
         }
       },
@@ -106,6 +109,7 @@ function Login({ onSwitchToLogin }) {
     });
 
   const handleSubmit = async (values) => {
+    // nếu chọn "Ghi nhớ đăng nhập" thì lưu vào localStorage
     if (values.rememberMe) {
       const credentialsToSave = {
         email: values.email,
@@ -118,13 +122,8 @@ function Login({ onSwitchToLogin }) {
     } else {
       localStorage.removeItem('rememberedCredentials');
     }
-
     loginMutate(values);
   };
-
-  const handleLoginGoogle = useGoogleLogin({
-    onSuccess: (tokenResponse) => mutateLoginGoogle(tokenResponse),
-  });
 
   return (
     <div className="bg-white relative rounded-2xl shadow-xl p-5 md:p-8">
@@ -145,15 +144,6 @@ function Login({ onSwitchToLogin }) {
         >
           Quay về trang chủ
         </p>
-        <p
-          onClick={() => {
-            localStorage.setItem('isAuthenticated', true);
-            navigate('/');
-          }}
-          className="mt-2 text-blue-600 hover:text-blue-800 cursor-pointer font-medium transition-colors"
-        >
-          Đăng nhập với tư cách khách
-        </p>
       </div>
       <Form
         form={form}
@@ -167,15 +157,18 @@ function Login({ onSwitchToLogin }) {
           rules={[
             {
               required: true,
-              message: 'Vui lòng nhập email hoặc số điện thoại',
+              message: 'Vui lòng nhập email',
             },
-            { min: 8, message: 'Tối thiểu 8 ký tự' },
+            {
+              type: 'email',
+              message: 'Email không hợp lệ',
+            },
           ]}
           className="mb-5"
         >
           <Input
-            prefix={<UserOutlined className="text-gray-400" />}
-            placeholder="Email hoặc số điện thoại"
+            prefix={<MailOutlined className="text-gray-400" />}
+            placeholder="Email"
             autoFocus
             size="large"
             className="!py-3 !px-4 !text-base !rounded-lg"
@@ -211,7 +204,7 @@ function Login({ onSwitchToLogin }) {
             <Checkbox className="text-gray-600">Ghi nhớ đăng nhập</Checkbox>
           </Form.Item>
           <Link
-            to="/forgot-password"
+            onClick={onForgotPassword}
             className="text-blue-900 hover:text-blue-800 text-sm font-medium transition-colors"
           >
             Quên mật khẩu?
@@ -231,22 +224,21 @@ function Login({ onSwitchToLogin }) {
           <span className="text-[#999999]">hoặc</span>
           <div className="ml-2 h-[1px] w-full bg-[#e6e8eb]"></div>
         </div>
-        <Button
-          onClick={() => handleLoginGoogle()}
-          loading={isPending || isLoadingLoginGoogle}
-          className="mx-auto mt-5 block !h-12 w-full rounded-[5px] border border-gray-300 py-5 bg-[#fff] text-[grey] shadow-none hover:!border-primary hover:!bg-transparent hover:!text-primary"
-        >
-          <div className="flex items-center justify-center tracking-wider">
-            <img
-              src="https://freesvg.org/img/1534129544.png"
-              width={30}
-              height={30}
-              alt=""
-              className="mr-2"
-            />
-            Tiếp tục với Google
-          </div>
-        </Button>
+        <div className="mt-5">
+          {/* xử lý login google bằng react-oauth/google */}
+          <GoogleLogin
+            theme="outline"
+            size="large"
+            width="100%"
+            onSuccess={(credentialResponse) => {
+              // lấy idToken gửi cho backend
+              mutateLoginGoogle({ idToken: credentialResponse?.credential });
+            }}
+            onError={() => {
+              console.log('Login Failed');
+            }}
+          />
+        </div>
 
         <div className="text-center mt-6">
           <span className="text-gray-600">Bạn chưa có tài khoản? </span>

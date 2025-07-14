@@ -21,6 +21,7 @@ import {
   getResponseCodeMessageVnpay,
   notify,
 } from '../../utils';
+
 const queryClient = new QueryClient();
 
 const Payment = () => {
@@ -34,6 +35,7 @@ const Payment = () => {
     useMutation({
       mutationFn: createPackageAfterPayment,
       onSuccess: () => {
+        // làm mới cache và xóa usagePackageId khi thành công
         queryClient.invalidateQueries(['user-package']);
         localStorage.removeItem('usagePackageId');
       },
@@ -43,6 +45,7 @@ const Payment = () => {
       },
     });
 
+  // lấy dữ liệu thanh toán từ URL khi mới vào trang
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const payload = {
@@ -52,16 +55,19 @@ const Payment = () => {
     };
     let data = {};
 
+    // lấy tất cả tham số từ trên URl
     for (const [key, value] of urlParams.entries()) {
       data[key] = decodeURIComponent(value);
     }
 
+    // nếu không có dữ liệu thì điều hướng về trang lỗi (tránh trường hợp user truy cập trực tiếp vào trang này)
     if (Object.keys(data).length === 0) {
       navigate('/*');
       return;
     }
 
     setPaymentData(data);
+    // nếu thanh toán thành công thì gọi API tạo package
     if (data?.vnp_TransactionStatus === '00') {
       mutateCreatePackage(payload);
     } else {
@@ -69,6 +75,7 @@ const Payment = () => {
     }
   }, []);
 
+  // xác định trạng thái thanh toán dựa vào mã trả về từ VNPAY
   const getStatusInfo = (responseCode, transactionStatus) => {
     if (responseCode === '00' && transactionStatus === '00') {
       return {
@@ -97,6 +104,7 @@ const Payment = () => {
     }
   };
 
+  // hiển thị loading khi chưa có dữ liệu hoặc đang xử lý tạo package
   if (!paymentData || isLoadingCreatePackage) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -111,6 +119,7 @@ const Payment = () => {
   );
   const StatusIcon = statusInfo?.icon;
 
+  // kiểm tra thanh toán thành công hay không
   const isPaymentSuccessful =
     paymentData?.vnp_ResponseCode === '00' &&
     paymentData?.vnp_TransactionStatus === '00';
@@ -287,6 +296,7 @@ const Payment = () => {
                 </div>
               </div>
 
+              {/* tổng cộng chỉ hiển thị khi thanh toán thành công */}
               {isPaymentSuccessful && (
                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border-2 border-blue-100">
                   <div className="flex justify-between items-center">

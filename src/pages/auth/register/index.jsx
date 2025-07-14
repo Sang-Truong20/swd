@@ -8,32 +8,90 @@ import {
   UserOutlined,
 } from '@ant-design/icons';
 import { useMutation } from '@tanstack/react-query';
-import { Button, DatePicker, Form, Input } from 'antd';
+import { Button, DatePicker, Drawer, Form, Input, Typography } from 'antd';
 import dayjs from 'dayjs';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { register } from '../../../services/auth';
+import { receiveOTP, register, verifyAccount } from '../../../services/auth';
 import { notify } from '../../../utils';
 
 function Register({ onSwitchToLogin }) {
+  const { Text, Title } = Typography;
   const [form] = Form.useForm();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [otpDrawerOpen, setOtpDrawerOpen] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [registerInfo, setRegisterInfo] = useState(null);
 
-  const { mutate: registerMutate, isPending } = useMutation({
+  // B1: gửi email -> nhận OTP
+  const { mutate: mutateReceiveOtp, isPending: isLoadingReceiveOtp } =
+    useMutation({
+      mutationFn: receiveOTP,
+      onSuccess: () => {
+        setOtpDrawerOpen(true);
+        notify('success', {
+          description:
+            'Mã OTP đã được gửi. Vui lòng kiểm tra hòm thư (hoặc Thư rác) để lấy mã OTP',
+        });
+      },
+      onError: (err) => {
+        notify('error', { description: err.response.data });
+      },
+    });
+
+  // B2: xác minh OTP + đăng kí tài khoản
+  const { mutate: mutateVerifyAccount, isPending: isLoadingVerifyAccount } =
+    useMutation({
+      mutationFn: verifyAccount,
+      onSuccess: () => {
+        setOtp('');
+        mutateRegister(registerInfo);
+      },
+      onError: (err) => {
+        if (err.response && err.response.data === 'OTP invalid or expired') {
+          notify('error', { description: 'OTP không hợp lệ hoặc đã hết hạn' });
+          return;
+        }
+        notify('error', { description: err.response.data });
+      },
+    });
+
+  // đăng ký tài khoản
+  const { mutate: mutateRegister } = useMutation({
     mutationFn: register,
     onSuccess: () => {
-      notify('success', { description: 'Đăng ký tài khoản thành công' });
+      setOtpDrawerOpen(false);
+      notify('success', {
+        description: 'Đăng ký thành công. Vui lòng đăng nhập để vào hệ thống',
+      });
       onSwitchToLogin();
     },
-    onError: (err) => {
-      if (err && err.status === 401) {
-        notify('error', { description: 'Thông tin đăng ký không hợp lệ' });
-        return;
-      }
+    onError: () => {
       notify('error', { description: 'Lỗi hệ thống' });
     },
   });
+
+  const handleOtpConfirm = () => {
+    if (otp.length !== 6) {
+      notify('info', { description: 'Mã OTP phải có 6 chữ số' });
+      return;
+    }
+
+    const { email } = form.getFieldsValue();
+    const payload = {
+      email,
+      otp,
+    };
+
+    // fake loading để tránh spam
+    setOtpLoading(true);
+    setTimeout(() => {
+      setOtpLoading(false);
+      mutateVerifyAccount(payload);
+    }, 800);
+  };
 
   const togglePassword = () => setShowPassword((prev) => !prev);
   const toggleConfirmPassword = () => setShowConfirmPassword((prev) => !prev);
@@ -46,8 +104,9 @@ function Register({ onSwitchToLogin }) {
       ...rest,
       birthday: values.birthday.format('YYYY-MM-DD'),
     };
-
-    registerMutate(payload);
+    // lưu thông tin đăng ký để tạo tài khoản sau khi xác minh OTP
+    setRegisterInfo(payload);
+    mutateReceiveOtp(payload.email);
   };
 
   return (
@@ -189,7 +248,7 @@ function Register({ onSwitchToLogin }) {
                   return Promise.resolve();
                 }
                 return Promise.reject(
-                  new Error('Mật khẩu xác nhận không khớp!'),
+                  new Error('Mật khẩu xác nhận không khớp'),
                 );
               },
             }),
@@ -217,7 +276,7 @@ function Register({ onSwitchToLogin }) {
         <Button
           type="primary"
           htmlType="submit"
-          loading={isPending}
+          loading={isLoadingReceiveOtp}
           className="w-full mt-5 flex justify-center items-center !h-12 !text-lg !font-semibold !border-0 !rounded-lg"
           size="large"
         >
@@ -234,6 +293,50 @@ function Register({ onSwitchToLogin }) {
           </Link>
         </div>
       </Form>
+
+      {/* xử lý overlay cho form OTP */}
+      <Drawer
+        title={null}
+        placement="bottom"
+        onClose={() => setOtpDrawerOpen(false)}
+        open={otpDrawerOpen}
+        closable={false}
+        height={270}
+        style={{ borderTopLeftRadius: 12, borderTopRightRadius: 12 }}
+      >
+        <div className="flex flex-col h-full justify-center items-center text-left">
+          <div className="max-w-md mx-auto">
+            <Title level={4} className="!mb-0">
+              Nhập mã OTP 6 số
+            </Title>
+            <Text type="secondary">
+              Mã xác thực đã được gửi đến email của bạn. Vui lòng kiểm tra và
+              nhập mã bên dưới
+            </Text>
+            <div className="flex justify-center items-center m-4">
+              <Input.OTP
+                length={6}
+                size="large"
+                id="custom-otp"
+                className="w-full"
+                value={otp}
+                formatter={(str) => str.toUpperCase()}
+                onChange={(value) => setOtp(value)}
+              />
+            </div>
+
+            <Button
+              type="primary"
+              className="mt-4 w-full"
+              size="large"
+              loading={otpLoading || isLoadingVerifyAccount}
+              onClick={handleOtpConfirm}
+            >
+              Xác nhận
+            </Button>
+          </div>
+        </div>
+      </Drawer>
     </div>
   );
 }

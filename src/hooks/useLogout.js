@@ -8,7 +8,6 @@ const useLogout = () => {
   const queryClient = useQueryClient();
 
   const logout = () => {
-    localStorage.removeItem('isAuthenticated');
     localStorage.removeItem('userId');
     Cookies.remove('accessToken');
     Cookies.remove('refreshToken');

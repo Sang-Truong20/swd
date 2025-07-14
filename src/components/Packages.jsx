@@ -6,11 +6,12 @@ import PackageSkeleton from '../components/PackageSkeleton';
 import { PATH_NAME } from '../constants';
 import { getAllPackage, payment } from '../services/package';
 import { notify } from '../utils';
+import { useUserData } from '../hooks/useUserData';
 
 const Packages = () => {
   const [isProcessing, setIsProcessing] = useState(false);
-  const isAuthenticated = localStorage.getItem('isAuthenticated');
   const navigate = useNavigate();
+  const { userInfo } = useUserData();
 
   const { data: packageList, isLoading } = useQuery({
     queryKey: ['user-package-list'],
@@ -110,7 +111,7 @@ const Packages = () => {
 
   const handleUpGradePackage = (pkg) => {
     if (isProcessing) return;
-    if (!isAuthenticated) {
+    if (!userInfo) {
       navigate(PATH_NAME.AUTH);
       notify('info', {
         description: 'Vui lòng đăng nhập trước khi mua gói dịch vụ',

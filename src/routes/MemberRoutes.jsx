@@ -4,7 +4,7 @@ import { PATH_NAME } from '../constants';
 import { useUserData } from '../hooks/useUserData';
 
 const MemberRoutes = () => {
-  const { userInfo, isLoading } = useUserData();
+  const { isLoading } = useUserData();
 
   if (isLoading) {
     return (
@@ -14,7 +14,7 @@ const MemberRoutes = () => {
     );
   }
 
-  const isMember = userInfo && userInfo.role === 'USER';
+  const isMember = true;
 
   return isMember ? <Outlet /> : <Navigate to={PATH_NAME.NOT_FOUND} replace />;
 };

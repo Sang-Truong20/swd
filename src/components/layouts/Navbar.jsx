@@ -12,7 +12,6 @@ import NavElements from './NavElements';
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { count: notificationCount } = useNotificationStore();
-  const isAuthenticated = localStorage.getItem('isAuthenticated');
   const navigate = useNavigate();
   const logout = useLogout();
   const { userInfo } = useUserData();
@@ -53,7 +52,7 @@ const Navbar = () => {
             </nav>
 
             <div className="flex items-center space-x-3">
-              {isAuthenticated || userInfo ? (
+              {userInfo ? (
                 <>
                   <NotificationBell count={notificationCount} />
                   <div className="h-8 w-px bg-gray-300" />
@@ -71,7 +70,7 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center space-x-2 lg:hidden">
-            {isAuthenticated || userInfo ? (
+            {userInfo ? (
               <>
                 <NotificationBell count={notificationCount} />
                 <UserMenu user={userInfo} onLogout={handleLogout} mobile />

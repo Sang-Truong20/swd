@@ -1,11 +1,31 @@
-import { CarOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { CheckCircleOutlined } from '@ant-design/icons';
 import { useState } from 'react';
 import { FaBalanceScale } from 'react-icons/fa';
+import ForgotPassword from './forgot';
 import Login from './login';
 import Register from './register';
 
 function AuthPage() {
-  const [isLoginForm, setIsLoginForm] = useState(true);
+  const [formType, setFormType] = useState('login');
+
+  // xử lý chuyển đổi giữa các form
+  const renderForm = () => {
+    switch (formType) {
+      case 'login':
+        return (
+          <Login
+            onSwitchToLogin={() => setFormType('register')}
+            onForgotPassword={() => setFormType('forgot')}
+          />
+        );
+      case 'register':
+        return <Register onSwitchToLogin={() => setFormType('login')} />;
+      case 'forgot':
+        return <ForgotPassword onSwitchToLogin={() => setFormType('login')} />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex">
@@ -91,17 +111,13 @@ function AuthPage() {
           <div className="lg:hidden mb-8 text-center">
             <div className="flex items-center justify-center gap-3 mb-4">
               <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center">
-                <CarOutlined className="text-2xl !text-white" />
+                <FaBalanceScale className="text-3xl !text-white" />
               </div>
               <h1 className="text-2xl font-bold text-gray-800">SmartLawGT</h1>
             </div>
           </div>
 
-          {isLoginForm ? (
-            <Login onSwitchToLogin={() => setIsLoginForm(false)} />
-          ) : (
-            <Register onSwitchToLogin={() => setIsLoginForm(true)} />
-          )}
+          {renderForm()}
 
           <div className="text-center mt-6 text-sm text-gray-500">
             <p>© 2025 SmartLawGT. Nền tảng tư vấn pháp luật giao thông.</p>

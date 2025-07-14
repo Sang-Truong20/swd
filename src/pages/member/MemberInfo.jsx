@@ -53,6 +53,7 @@ const MemberInfo = () => {
     setFileChange(newFileChange);
   }, []);
 
+  // xử lý giá trị khởi tạo cho form (đảm bảo birthday là dayjs object để tránh lỗi)
   const normalizedInitialValues = useMemo(() => {
     if (!userInfo) return {};
 
@@ -131,7 +132,7 @@ const MemberInfo = () => {
               name="birthday"
               rules={[{ required: true, message: 'Vui lòng chọn ngày sinh' }]}
               normalize={(value) => {
-                // Normalize giá trị để đảm bảo nó luôn là dayjs object
+                // normalize giá trị để đảm bảo nó luôn là dayjs object
                 if (!value) return null;
                 if (dayjs.isDayjs(value)) return value;
                 return dayjs(value).isValid() ? dayjs(value) : null;
