@@ -283,7 +283,7 @@ function Register({ onSwitchToLogin }) {
         style={{ borderTopLeftRadius: 12, borderTopRightRadius: 12 }}
       >
         <div className="flex flex-col h-full justify-center items-center text-left">
-          <div className="max-w-xl mx-auto">
+          <div className="max-w-md mx-auto">
             <Title level={4} className="!mb-0">
               Nhập mã OTP 6 số
             </Title>
