@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Package, Activity, LogOut, Home, BarChart3 } from 'lucide-react';
+import { Users, Package, Activity, LogOut, Home, BarChart3, FileText, Tag } from 'lucide-react';
 import UserManagement from './components/UserManagement';
 import PackageManagement from './components/PackageManagement';
 import UserPackageManagement from './components/UserPackageManagement';
+import LawsManagement from './components/LawsManagement';
+import LawTypeManagement from './components/LawTypeManagement';
 import { analyticsService } from './services/adminService';
 import './Dashboard.css';
 
@@ -28,6 +30,17 @@ const DashboardOverview = ({ stats, loading, error }) => {
       )}
       
       <div className="stats-grid">
+        <div className="stat-card">
+          <div className="stat-icon">
+            <FileText size={24} />
+          </div>
+          <div className="stat-content">
+            <h3>{stats?.totalLaws || 0}</h3>
+            <p>Tổng văn bản pháp luật</p>
+            <small>{stats?.validLaws || 0} đang có hiệu lực</small>
+          </div>
+        </div>
+
         <div className="stat-card">
           <div className="stat-icon">
             <Package size={24} />
@@ -163,6 +176,8 @@ const Dashboard = () => {
 
   const menuItems = [
     { id: 'overview', label: 'Tổng quan', icon: BarChart3, component: () => <DashboardOverview stats={dashboardStats} loading={statsLoading} error={statsError} /> },
+    { id: 'laws', label: 'Quản lý Văn bản', icon: FileText, component: LawsManagement },
+    { id: 'law-types', label: 'Loại Văn bản', icon: Tag, component: LawTypeManagement },
     { id: 'users', label: 'Quản lý Users', icon: Users, component: UserManagement },
     { id: 'packages', label: 'Quản lý Packages', icon: Package, component: PackageManagement },
     { id: 'user-packages', label: 'Quản lý Subscriptions', icon: Activity, component: UserPackageManagement },

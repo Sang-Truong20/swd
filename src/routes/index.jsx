@@ -15,8 +15,8 @@ const MemberInfo = lazy(() => import('../pages/member/MemberInfo'));
 const ChangePassword = lazy(() => import('../pages/member/ChangePassword'));
 const PackageManager = lazy(() => import('../pages/member/PackageManager'));
 const AdminHome = lazy(() => import('../pages/admin'));
-const Post = lazy(() => import('../pages/post'));
-const PostDetail = lazy(() => import('../pages/post/detail'));
+const LawsPage = lazy(() => import('../pages/laws/LawsList'));
+const LawDetail = lazy(() => import('../pages/laws/LawDetail'));
 const PaymentPage = lazy(() => import('../pages/payment'));
 
 const withSuspense = (Component) => (
@@ -44,12 +44,12 @@ const router = createBrowserRouter([
         element: withSuspense(LandingPage),
       },
       {
-        path: PATH_NAME.POST,
-        element: withSuspense(Post),
+        path: PATH_NAME.LAWS,
+        element: withSuspense(LawsPage),
       },
       {
-        path: PATH_NAME.POST_DETAIL,
-        element: withSuspense(PostDetail),
+        path: PATH_NAME.LAW_DETAIL,
+        element: withSuspense(LawDetail),
       },
       {
         path: PATH_NAME.PAYMENT,
