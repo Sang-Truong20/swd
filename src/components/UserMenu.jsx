@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useUserData } from '../hooks/useUserData';
 
 const UserMenu = ({ user, onLogout, mobile = false }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
+  const { userInfo } = useUserData();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -43,7 +45,7 @@ const UserMenu = ({ user, onLogout, mobile = false }) => {
         .slice(0, 2);
   };
 
-  const menuItems = [
+  let menuItems = [
     {
       icon: (
         <svg
@@ -108,6 +110,28 @@ const UserMenu = ({ user, onLogout, mobile = false }) => {
       path: '/member/package',
     },
   ];
+
+  if (userInfo?.role === 'ADMIN') {
+    menuItems.unshift({
+      icon: (
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M3 3h18v2H3V3zm0 4h18v2H3V7zm0 4h18v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6zm2 2v4h14v-4H5z"
+          />
+        </svg>
+      ),
+      label: 'Thống kê',
+      path: '/admin',
+    });
+  }
 
   if (mobile) {
     return (
