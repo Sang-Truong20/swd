@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Edit, Trash2, Shield, ShieldOff, User } from 'lucide-react';
+import { Modal } from 'antd';
 import UserModal from './UserModal';
 import { userService } from '../services/adminService';
+import { notify } from '../../../utils';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -45,41 +47,49 @@ const UserManagement = () => {
   };
 
   const handleBlockUser = async (userId) => {
-    if (window.confirm('Bạn có chắc chắn muốn block user này?')) {
-      try {
-        await userService.blockUser(userId);
-        await loadUsers(); // Reload data after action
-        alert('User đã được block thành công!');
-      } catch (error) {
-        console.error('Error blocking user:', error);
-        alert('Có lỗi xảy ra khi block user: ' + error.message);
-      }
-    }
+    Modal.confirm({
+      title: 'Xác nhận block user',
+      content: 'Bạn có chắc chắn muốn block user này?',
+      onOk: async () => {
+        try {
+          await userService.blockUser(userId);
+          await loadUsers(); // Reload data after action
+          notify('success', { description: 'User đã được block thành công!' });
+        } catch (error) {
+          console.error('Error blocking user:', error);
+          notify('error', { description: 'Có lỗi xảy ra khi block user: ' + error.message });
+        }
+      },
+    });
   };
 
   const handleUnblockUser = async (userId) => {
-    if (window.confirm('Bạn có chắc chắn muốn unblock user này?')) {
-      try {
-        await userService.unblockUser(userId);
-        await loadUsers(); // Reload data after action
-        alert('User đã được unblock thành công!');
-      } catch (error) {
-        console.error('Error unblocking user:', error);
-        alert('Có lỗi xảy ra khi unblock user: ' + error.message);
-      }
-    }
+    Modal.confirm({
+      title: 'Xác nhận unblock user',
+      content: 'Bạn có chắc chắn muốn unblock user này?',
+      onOk: async () => {
+        try {
+          await userService.unblockUser(userId);
+          await loadUsers(); // Reload data after action
+          notify('success', { description: 'User đã được unblock thành công!' });
+        } catch (error) {
+          console.error('Error unblocking user:', error);
+          notify('error', { description: 'Có lỗi xảy ra khi unblock user: ' + error.message });
+        }
+      },
+    });
   };
 
   const handleSaveUser = async (userData) => {
     try {
       // Update existing user only
       await userService.updateUser(selectedUser.userId, userData);
-      alert('User đã được cập nhật thành công!');
+      notify('success', { description: 'User đã được cập nhật thành công!' });
       await loadUsers(); // Reload data after action
       setShowModal(false);
     } catch (error) {
       console.error('Error saving user:', error);
-      alert('Có lỗi xảy ra khi lưu user: ' + error.message);
+      notify('error', { description: 'Có lỗi xảy ra khi lưu user: ' + error.message });
     }
   };
 

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Shield, ShieldOff, Calendar, Package, User, DollarSign } from 'lucide-react';
+import { Modal } from 'antd';
 import { userPackageService } from '../services/adminService';
+import { notify } from '../../../utils';
 
 const UserPackageManagement = () => {
   const [userPackages, setUserPackages] = useState([]);
@@ -40,29 +42,37 @@ const UserPackageManagement = () => {
   });
 
   const handleBlockUserPackage = async (userPackageId) => {
-    if (window.confirm('Bạn có chắc chắn muốn khóa gói đăng ký này?')) {
-      try {
-        await userPackageService.blockUserPackage(userPackageId);
-        await loadUserPackages(); // Reload data after action
-        alert('Gói đăng ký đã được khóa thành công!');
-      } catch (error) {
-        console.error('Error blocking user package:', error);
-        alert('Có lỗi xảy ra khi khóa gói đăng ký: ' + error.message);
-      }
-    }
+    Modal.confirm({
+      title: 'Xác nhận khóa gói đăng ký',
+      content: 'Bạn có chắc chắn muốn khóa gói đăng ký này?',
+      onOk: async () => {
+        try {
+          await userPackageService.blockUserPackage(userPackageId);
+          await loadUserPackages(); // Reload data after action
+          notify('success', { description: 'Gói đăng ký đã được khóa thành công!' });
+        } catch (error) {
+          console.error('Error blocking user package:', error);
+          notify('error', { description: 'Có lỗi xảy ra khi khóa gói đăng ký: ' + error.message });
+        }
+      },
+    });
   };
 
   const handleUnblockUserPackage = async (userPackageId) => {
-    if (window.confirm('Bạn có chắc chắn muốn mở khóa gói đăng ký này?')) {
-      try {
-        await userPackageService.unblockUserPackage(userPackageId);
-        await loadUserPackages(); // Reload data after action
-        alert('Gói đăng ký đã được mở khóa thành công!');
-      } catch (error) {
-        console.error('Error unblocking user package:', error);
-        alert('Có lỗi xảy ra khi mở khóa gói đăng ký: ' + error.message);
-      }
-    }
+    Modal.confirm({
+      title: 'Xác nhận mở khóa gói đăng ký',
+      content: 'Bạn có chắc chắn muốn mở khóa gói đăng ký này?',
+      onOk: async () => {
+        try {
+          await userPackageService.unblockUserPackage(userPackageId);
+          await loadUserPackages(); // Reload data after action
+          notify('success', { description: 'Gói đăng ký đã được mở khóa thành công!' });
+        } catch (error) {
+          console.error('Error unblocking user package:', error);
+          notify('error', { description: 'Có lỗi xảy ra khi mở khóa gói đăng ký: ' + error.message });
+        }
+      },
+    });
   };
 
   const getStatusBadge = (status) => {

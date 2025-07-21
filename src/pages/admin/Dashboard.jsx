@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Package, Activity, LogOut, Home, BarChart3, FileText, Tag } from 'lucide-react';
+import { Modal } from 'antd';
 import UserManagement from './components/UserManagement';
 import PackageManagement from './components/PackageManagement';
 import UserPackageManagement from './components/UserPackageManagement';
 import LawsManagement from './components/LawsManagement';
 import LawTypeManagement from './components/LawTypeManagement';
 import { analyticsService } from './services/adminService';
+import { notify } from '../../utils';
 import './Dashboard.css';
 
 // Dashboard Overview Component
@@ -120,13 +122,20 @@ const Dashboard = () => {
   };
 
   const handleLogout = () => {
-    if (window.confirm('Bạn có chắc chắn muốn đăng xuất?')) {
-      // Clear any stored auth data
-      localStorage.removeItem('authToken');
-      sessionStorage.clear();
-      // Redirect to login or home
-      window.location.href = '/auth';
-    }
+    Modal.confirm({
+      title: 'Xác nhận đăng xuất',
+      content: 'Bạn có chắc chắn muốn đăng xuất?',
+      onOk: () => {
+        // Clear any stored auth data
+        localStorage.removeItem('authToken');
+        sessionStorage.clear();
+        notify('success', { description: 'Đăng xuất thành công!' });
+        // Redirect to login or home
+        setTimeout(() => {
+          window.location.href = '/auth';
+        }, 1000);
+      },
+    });
   };
 
   // Load dashboard statistics
