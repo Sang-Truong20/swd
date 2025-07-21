@@ -1,4 +1,5 @@
 import { notification } from 'antd';
+import { MOMO_RETURN_CONSTANTS } from '../pages/payment/momo/constants';
 
 export const formatDateChatBot = (dateString) => {
   const date = new Date(dateString);
@@ -61,6 +62,11 @@ export const formatAmountVnpayRes = (amount) => {
   return `${amountInVND.toLocaleString('vi-VN')} VND`;
 };
 
+export const formatAmountMomoRes = (amount) => {
+  const amountInVND = parseInt(amount);
+  return `${amountInVND.toLocaleString('vi-VN')} VND`;
+};
+
 export const formatDate = (dateString) => {
   if (!dateString || dateString.length < 14) return dateString;
 
@@ -72,6 +78,23 @@ export const formatDate = (dateString) => {
   const second = dateString.substring(12, 14);
 
   return `${day}/${month}/${year} ${hour}:${minute}:${second}`;
+};
+
+export const formatMomoDate = (timestamp) => {
+  if (!timestamp) return '';
+
+  const date = new Date(Number(timestamp));
+  const pad = (n) => n.toString().padStart(2, '0');
+
+  const day = pad(date.getDate());
+  const month = pad(date.getMonth() + 1);
+  const year = date.getFullYear();
+
+  const hours = pad(date.getHours());
+  const minutes = pad(date.getMinutes());
+  const seconds = pad(date.getSeconds());
+
+  return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
 };
 
 export const getResponseCodeMessageVnpay = (code) => {
@@ -91,6 +114,13 @@ export const getResponseCodeMessageVnpay = (code) => {
     99: 'Các lỗi khác (lỗi còn lại, không có trong danh sách mã lỗi đã liệt kê)',
   };
   return codes[code] || 'Mã lỗi không xác định';
+};
+
+export const getResponseCodeMessageMomo = (resultCode) => {
+  return (
+    MOMO_RETURN_CONSTANTS.MOMO_ERROR_MAP[resultCode] ||
+    'Giao dịch thất bại. Vui lòng liên hệ MoMo để biết thêm chi tiết.'
+  );
 };
 
 export const getDateKey = (dateString) => {
