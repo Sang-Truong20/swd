@@ -15,6 +15,7 @@ const PATH_NAME = {
   CHANGE_PASSWORD: '/member/change-password',
   MEMBER_INFO: '/member/info',
   PAYMENT: '/vnpay/return',
+  MOMO_RETURN: '/momo/return',
 };
 
 const NAV_ELEMENTS = [

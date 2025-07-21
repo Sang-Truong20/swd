@@ -1,15 +1,21 @@
 import { ArrowRightOutlined, CheckOutlined } from '@ant-design/icons';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { Modal } from 'antd';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import momoLogo from '../assets/images/momo_logo.webp';
+import vnpayLogo from '../assets/images/vnpay_logo.jpg';
 import PackageSkeleton from '../components/PackageSkeleton';
 import { PATH_NAME } from '../constants';
+import { useUserData } from '../hooks/useUserData';
 import { getAllPackage, payment } from '../services/package';
 import { notify } from '../utils';
-import { useUserData } from '../hooks/useUserData';
 
 const Packages = () => {
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedPackage, setSelectedPackage] = useState(null);
+  const [selectedMethod, setSelectedMethod] = useState(null);
   const navigate = useNavigate();
   const { userInfo } = useUserData();
 
@@ -104,7 +110,6 @@ const Packages = () => {
     onError: (err) => {
       console.log('Payment error:', err);
       localStorage.removeItem('usagePackageId');
-
       notify('error', { description: 'Lỗi hệ thống' });
     },
   });
@@ -118,21 +123,115 @@ const Packages = () => {
       });
       return;
     }
+    setSelectedPackage(pkg);
+    setShowPaymentModal(true);
+    setSelectedMethod('VNPAY');
+  };
 
+  const handlePaymentMethod = (method) => {
+    if (!selectedPackage) return;
+    const pkg = selectedPackage;
     const payload = {
       amount: Number(pkg.price.replace(/[^\d]/g, '')),
       orderInfo: `Thanh toán ${pkg.name} - ${pkg.totalToken} lượt`,
-      transactionMethod: 'VNPAY',
+      transactionMethod: method,
       usagePackageId: pkg.usagePackageId,
     };
     localStorage.setItem('usagePackageId', payload.usagePackageId);
-
     setIsProcessing(true);
+    setShowPaymentModal(false);
     mutatePayment(payload);
   };
 
   return (
     <section className="relative py-20 px-6 overflow-hidden bg-gray-50">
+      <Modal
+        open={showPaymentModal}
+        onCancel={() => setShowPaymentModal(false)}
+        footer={null}
+        centered
+        width={460}
+        closable={false}
+        className="custom-payment-modal rounded-2xl shadow-2xl"
+      >
+        <h2 className="text-2xl font-bold mb-2 text-center text-gray-800">
+          Chọn phương thức thanh toán
+        </h2>
+        <p className="text-center text-gray-500 mb-8 text-sm leading-relaxed">
+          Vui lòng chọn một phương thức thanh toán để tiếp tục
+        </p>
+
+        <div className="flex flex-col gap-5 w-full">
+          <div
+            className={`flex items-center w-full min-h-[72px] px-4 py-4 rounded-2xl border-2 bg-white shadow-sm cursor-pointer ${selectedMethod === 'VNPAY' ? 'border-blue-600' : 'border-gray-200'}`}
+            onClick={() => setSelectedMethod('VNPAY')}
+            style={{ userSelect: 'none' }}
+          >
+            <img
+              src={vnpayLogo}
+              alt="VNPAY"
+              className="w-14 h-14 rounded-full bg-white border-gray-300 border shadow-sm object-contain"
+            />
+            <div className="flex flex-col flex-1 ml-4">
+              <span className="font-semibold text-base text-blue-700">
+                VNPAY
+              </span>
+              <span className="text-xs text-gray-400">
+                Thanh toán qua ví điện tử VNPAY
+              </span>
+            </div>
+            {selectedMethod === 'VNPAY' && (
+              <span className="ml-2 text-blue-600 font-bold text-lg">✓</span>
+            )}
+          </div>
+          <div
+            className={`flex items-center w-full min-h-[72px] px-4 py-4 rounded-2xl border-2 bg-white shadow-sm cursor-pointer ${selectedMethod === 'MOMO' ? 'border-pink-500' : 'border-gray-200'}`}
+            onClick={() => setSelectedMethod('MOMO')}
+            style={{ userSelect: 'none' }}
+          >
+            <img
+              src={momoLogo}
+              alt="MOMO"
+              className="w-14 h-14 rounded-full bg-white border border-gray-300 shadow-sm object-contain"
+            />
+            <div className="flex flex-col flex-1 ml-4">
+              <span className="font-semibold text-base text-pink-600">
+                MOMO
+              </span>
+              <span className="text-xs text-gray-400">
+                Thanh toán qua ví điện tử MOMO
+              </span>
+            </div>
+            {selectedMethod === 'MOMO' && (
+              <span className="ml-2 text-pink-500 font-bold text-lg">✓</span>
+            )}
+          </div>
+        </div>
+        <div className="flex gap-x-2 mt-8">
+          <button
+            className={`cursor-pointer w-full py-4 px-6 rounded-xl font-semibold text-base transition-all duration-500 shadow-md ${
+              selectedMethod
+                ? selectedMethod === 'VNPAY'
+                  ? 'bg-blue-600 text-white hover:bg-blue-400'
+                  : 'bg-pink-500 text-white hover:bg-pink-400'
+                : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+            }`}
+            onClick={() => handlePaymentMethod(selectedMethod)}
+            disabled={!selectedMethod || isProcessing}
+            type="button"
+          >
+            Thanh toán
+          </button>
+          <button
+            className="cursor-pointer w-full py-3 px-6 rounded-xl hover:bg-gray-200 transition-all duration-500 font-semibold text-base bg-white text-gray-700 border border-gray-300"
+            onClick={() => setShowPaymentModal(false)}
+            disabled={isProcessing}
+          >
+            Hủy
+          </button>
+        </div>
+      </Modal>
+
       <div className="relative max-w-6xl mx-auto">
         <div className="text-center mb-16">
           <h1 className="text-3xl md:text-4xl font-bold bg-clip-text mb-4">

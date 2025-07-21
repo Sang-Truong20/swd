@@ -17,7 +17,8 @@ const PackageManager = lazy(() => import('../pages/member/PackageManager'));
 const AdminHome = lazy(() => import('../pages/admin'));
 const LawsPage = lazy(() => import('../pages/laws/LawsList'));
 const LawDetail = lazy(() => import('../pages/laws/LawDetail'));
-const PaymentPage = lazy(() => import('../pages/payment'));
+const PaymentPage = lazy(() => import('../pages/payment/vnpay'));
+const MomoReturn = lazy(() => import('../pages/payment/momo'));
 
 const withSuspense = (Component) => (
   <Suspense
@@ -54,6 +55,10 @@ const router = createBrowserRouter([
       {
         path: PATH_NAME.PAYMENT,
         element: withSuspense(PaymentPage),
+      },
+      {
+        path: PATH_NAME.MOMO_RETURN,
+        element: withSuspense(MomoReturn),
       },
       {
         element: <MemberRoutes />,
