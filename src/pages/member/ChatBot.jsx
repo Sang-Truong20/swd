@@ -8,6 +8,8 @@ import { quickOptions } from './constants/index';
 const ChatBot = ({ onClose }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showAnimation, setShowAnimation] = useState(true);
   const [isTyping, setIsTyping] = useState(false);
@@ -86,6 +88,40 @@ const ChatBot = ({ onClose }) => {
     if (textareaRef.current) {
       textareaRef.current.focus();
     }
+  };
+
+  // Voice recognition
+  const handleVoiceClick = () => {
+    if (!('webkitSpeechRecognition' in window)) {
+      alert('Trình duyệt của bạn không hỗ trợ nhận diện giọng nói.');
+      return;
+    }
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+      return;
+    }
+    const recognition = new window.webkitSpeechRecognition();
+    recognition.lang = 'vi-VN';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognition.onstart = () => {
+      setIsListening(true);
+    };
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setInput(transcript);
+      setIsListening(false);
+      focusTextarea();
+    };
+    recognition.onerror = () => {
+      setIsListening(false);
+    };
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+    recognitionRef.current = recognition;
+    recognition.start();
   };
 
   // scoll xuống cuối khung chat
@@ -484,6 +520,54 @@ const ChatBot = ({ onClose }) => {
 
         <div className="p-6 bg-white/80 backdrop-blur-sm border-t border-gray-100">
           <div className="flex gap-3 items-center bg-white rounded-2xl p-2 shadow-lg border border-gray-200 hover:shadow-xl transition-shadow">
+            <div className="relative group">
+              <button
+                className={`w-11 h-11 flex items-center justify-center rounded-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-1
+      ${
+        isListening
+          ? 'bg-red-500 text-white shadow-lg scale-105 animate-pulse'
+          : 'bg-gray-100 text-gray-600 hover:bg-blue-50 hover:text-blue-600 hover:scale-105'
+      }
+      ${isLoading ? 'opacity-50 cursor-not-allowed' : 'shadow-sm hover:shadow-md'}`}
+                onClick={handleVoiceClick}
+                type="button"
+                aria-label={isListening ? 'Dừng ghi âm' : 'Ghi âm giọng nói'}
+                disabled={isLoading}
+                title={isListening ? 'Nhấn để dừng ghi âm' : 'Nhấn để ghi âm'}
+              >
+                {isListening ? (
+                  <svg
+                    className="w-5 h-5"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M7 4a3 3 0 016 0v4a3 3 0 11-6 0V4zm4 10.93A7.001 7.001 0 0017 8a1 1 0 10-2 0A5 5 0 015 8a1 1 0 00-2 0 7.001 7.001 0 006 6.93V17H6a1 1 0 100 2h8a1 1 0 100-2h-3v-2.07z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
+                    />
+                  </svg>
+                )}
+              </button>
+
+              {isListening && (
+                <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-400 rounded-full border-2 border-white animate-ping"></div>
+              )}
+            </div>
             <textarea
               ref={textareaRef}
               className="flex-1 bg-transparent resize-none outline-none text-sm text-gray-700 placeholder-gray-500 leading-relaxed"
@@ -496,7 +580,6 @@ const ChatBot = ({ onClose }) => {
               disabled={isLoading}
               autoFocus
             />
-
             <button
               className={`p-3 rounded-2xl transition-all duration-300 ${
                 input.trim() && !isLoading
