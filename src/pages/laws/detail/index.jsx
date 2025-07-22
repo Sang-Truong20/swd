@@ -204,6 +204,8 @@ const LawDetailPage = () => {
 
           <Divider />
 
+
+
           {/* Description */}
           {law.description && (
             <>

@@ -307,3 +307,4 @@ const LawsPage = () => {
 };
 
 export default LawsPage;
+

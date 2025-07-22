@@ -93,3 +93,5 @@ export const lawTypeService = {
 // For backward compatibility
 export const publicLawService = lawService;
 export const publicLawTypeService = lawTypeService;
+
+
