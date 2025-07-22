@@ -20,55 +20,52 @@ const { Search } = Input;
 const LandingPage = () => {
   const [loading, setLoading] = useState(false);
   const { userInfo } = useUserData();
-
-  console.log('check userInfo', userInfo);
+  const navigate = window.location ? null : undefined; // placeholder
+  // Sử dụng useNavigate từ react-router-dom
+  // ...existing code...
 
   const features = [
     {
       icon: <MessageOutlined className="text-4xl text-blue-600" />,
-      title: 'Hỏi đáp thông minh',
+      title: 'Tư vấn văn bản luật giao thông',
       description:
-        'Trợ lý AI giải đáp các câu hỏi về pháp luật Việt Nam một cách chính xác và nhanh chóng.',
+        'Trợ lý AI tư vấn các vấn đề về luật giao thông một cách chính xác và nhanh chóng.',
     },
     {
       icon: <BookOutlined className="text-4xl text-green-600" />,
-      title: 'Tra cứu Pháp điển',
+      title: 'Tra cứu văn bản giao thông',
       description:
-        'Tra cứu Pháp điển Việt Nam hiện hành với giao diện thân thiện và dễ sử dụng.',
+        'Tra cứu các văn bản pháp luật giao thông đường bộ với giao diện thân thiện và dễ sử dụng.',
     },
     {
       icon: <FileTextOutlined className="text-4xl text-orange-600" />,
-      title: 'Văn bản QPPL',
+      title: 'Văn bản pháp luật giao thông',
       description:
-        'Tìm kiếm và tra cứu các văn bản quy phạm pháp luật một cách toàn diện.',
+        'Tìm kiếm và tra cứu các văn bản quy phạm pháp luật giao thông một cách toàn diện.',
     },
     {
       icon: <SafetyOutlined className="text-4xl text-red-600" />,
       title: 'Đáng tin cậy',
       description:
-        'Thông tin được cập nhật liên tục từ các nguồn pháp luật chính thức.',
+        'Thông tin được cập nhật liên tục từ các nguồn pháp luật giao thông chính thức.',
     },
     {
       icon: <TeamOutlined className="text-4xl text-purple-600" />,
       title: 'Hỗ trợ 24/7',
       description:
-        'Luôn sẵn sàng hỗ trợ bạn mọi lúc, mọi nơi với các vấn đề pháp lý.',
+        'Luôn sẵn sàng hỗ trợ bạn mọi lúc, mọi nơi với các vấn đề về luật giao thông.',
     },
     {
       icon: <SearchOutlined className="text-4xl text-cyan-600" />,
       title: 'Tìm kiếm nâng cao',
       description:
-        'Công cụ tìm kiếm thông minh giúp bạn tìm thông tin chính xác nhất.',
+        'Công cụ tìm kiếm thông minh giúp bạn tra cứu văn bản giao thông chính xác nhất.',
     },
   ];
 
   const handleSearch = (value) => {
-    setLoading(true);
-    // Simulate search functionality
-    setTimeout(() => {
-      setLoading(false);
-      console.log('Searching for:', value);
-    }, 1000);
+    // Chuyển hướng sang trang /laws với query search
+    window.location.href = `/laws?search=${encodeURIComponent(value)}`;
   };
 
   const handleGetStarted = () => {
@@ -94,15 +91,14 @@ const LandingPage = () => {
         <div className="max-w-4xl mx-auto px-4 text-center">
           <div className="animate-fade-in">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-              Tìm kiếm thông tin pháp luật
+              Tra cứu tư vấn văn bản pháp luật giao thông 
             </h2>
             <p className="text-lg text-gray-600 mb-8">
-              Nhập từ khóa để tìm kiếm các điều luật, văn bản quy phạm pháp luật
-              phù hợp
+              Nhập từ khóa để tìm kiếm các quy định, văn bản pháp luật giao thông phù hợp
             </p>
             <div className="max-w-2xl mx-auto">
               <Search
-                placeholder="Nhập từ khóa tìm kiếm..."
+                placeholder="Nhập từ khóa tìm kiếm về luật giao thông..."
                 enterButton={
                   <Button
                     type="primary"
@@ -119,7 +115,7 @@ const LandingPage = () => {
               />
             </div>
             <p className="text-sm text-gray-500 mt-4">
-              Ví dụ: "luật lao động", "hợp đồng mua bán", "quyền sở hữu trí tuệ"
+              Ví dụ: "xử phạt vi phạm giao thông", "quy định tốc độ", "bằng lái xe máy"
             </p>
           </div>
         </div>

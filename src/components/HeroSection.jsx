@@ -31,12 +31,12 @@ const HeroSection = ({ onGetStarted, onLearnMore }) => {
               </div>
               
               <p className="text-xl md:text-2xl text-blue-100 font-medium">
-                Hệ thống tư vấn pháp luật thông minh
+                Hệ thống tư vấn văn bản luật giao thông 
               </p>
               
               <div className="space-y-4">
                 <p className="text-lg text-blue-50 leading-relaxed">
-                  Giải pháp công nghệ hàng đầu giúp bạn tra cứu, tìm hiểu và giải đáp mọi thắc mắc về pháp luật Việt Nam một cách nhanh chóng và chính xác.
+                  Giải pháp công nghệ hàng đầu giúp bạn tra cứu, tìm hiểu và giải đáp mọi thắc mắc về văn bản luật giao thông một cách nhanh chóng và chính xác.
                 </p>
                 
                 <ul className="space-y-3 text-blue-50">

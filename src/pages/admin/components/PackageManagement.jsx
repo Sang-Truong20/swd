@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Plus, Edit, Trash2, Power, PowerOff, Package } from 'lucide-react';
+import { Modal } from 'antd';
 import PackageModal from './PackageModal';
 import { packageService } from '../services/adminService';
+import { notify } from '../../../utils';
 
 const PackageManagement = () => {
   const [packages, setPackages] = useState([]);
@@ -51,20 +53,24 @@ const PackageManagement = () => {
 
   const handleTogglePackage = async (packageId, currentStatus) => {
     const action = currentStatus ? 'vô hiệu hóa' : 'kích hoạt';
-    if (window.confirm(`Bạn có chắc chắn muốn ${action} gói này?`)) {
-      try {
-        if (currentStatus) {
-          await packageService.disablePackage(packageId);
-        } else {
-          await packageService.enablePackage(packageId);
+    Modal.confirm({
+      title: `Xác nhận ${action} gói`,
+      content: `Bạn có chắc chắn muốn ${action} gói này?`,
+      onOk: async () => {
+        try {
+          if (currentStatus) {
+            await packageService.disablePackage(packageId);
+          } else {
+            await packageService.enablePackage(packageId);
+          }
+          await loadPackages(); // Reload data after action
+          notify('success', { description: `Gói đã được ${action} thành công!` });
+        } catch (error) {
+          console.error(`Error ${action} package:`, error);
+          notify('error', { description: `Có lỗi xảy ra khi ${action} gói: ` + error.message });
         }
-        await loadPackages(); // Reload data after action
-        alert(`Gói đã được ${action} thành công!`);
-      } catch (error) {
-        console.error(`Error ${action} package:`, error);
-        alert(`Có lỗi xảy ra khi ${action} gói: ` + error.message);
-      }
-    }
+      },
+    });
   };
 
   const handleSavePackage = async (packageData) => {
@@ -72,17 +78,17 @@ const PackageManagement = () => {
       if (isEditing) {
         // Update existing package
         await packageService.updatePackage(selectedPackage.usagePackageId, packageData);
-        alert('Gói đã được cập nhật thành công!');
+        notify('success', { description: 'Gói đã được cập nhật thành công!' });
       } else {
         // Create new package
         await packageService.createPackage(packageData);
-        alert('Gói đã được tạo thành công!');
+        notify('success', { description: 'Gói đã được tạo thành công!' });
       }
       await loadPackages(); // Reload data after action
       setShowModal(false);
     } catch (error) {
       console.error('Error saving package:', error);
-      alert('Có lỗi xảy ra khi lưu gói: ' + error.message);
+      notify('error', { description: 'Có lỗi xảy ra khi lưu gói: ' + error.message });
     }
   };
 

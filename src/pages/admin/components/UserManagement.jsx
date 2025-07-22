@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, Edit, Trash2, Shield, ShieldOff, User } from 'lucide-react';
+import { Search, Edit, Trash2, Shield, ShieldOff, User } from 'lucide-react';
+import { Modal } from 'antd';
 import UserModal from './UserModal';
 import { userService } from '../services/adminService';
+import { notify } from '../../../utils';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -38,12 +40,6 @@ const UserManagement = () => {
     (user.name || '').toLowerCase().includes((searchTerm || '').toLowerCase())
   );
 
-  const handleCreateUser = () => {
-    setSelectedUser(null);
-    setIsEditing(false);
-    setShowModal(true);
-  };
-
   const handleEditUser = (user) => {
     setSelectedUser(user);
     setIsEditing(true);
@@ -51,62 +47,82 @@ const UserManagement = () => {
   };
 
   const handleBlockUser = async (userId) => {
-    if (window.confirm('Bạn có chắc chắn muốn block user này?')) {
-      try {
-        await userService.blockUser(userId);
-        await loadUsers(); // Reload data after action
-        alert('User đã được block thành công!');
-      } catch (error) {
-        console.error('Error blocking user:', error);
-        alert('Có lỗi xảy ra khi block user: ' + error.message);
-      }
-    }
+    Modal.confirm({
+      title: 'Xác nhận block user',
+      content: 'Bạn có chắc chắn muốn block user này?',
+      onOk: async () => {
+        try {
+          await userService.blockUser(userId);
+          await loadUsers(); // Reload data after action
+          notify('success', { description: 'User đã được block thành công!' });
+        } catch (error) {
+          console.error('Error blocking user:', error);
+          notify('error', { description: 'Có lỗi xảy ra khi block user: ' + error.message });
+        }
+      },
+    });
   };
 
   const handleUnblockUser = async (userId) => {
-    if (window.confirm('Bạn có chắc chắn muốn unblock user này?')) {
-      try {
-        await userService.unblockUser(userId);
-        await loadUsers(); // Reload data after action
-        alert('User đã được unblock thành công!');
-      } catch (error) {
-        console.error('Error unblocking user:', error);
-        alert('Có lỗi xảy ra khi unblock user: ' + error.message);
-      }
-    }
+    Modal.confirm({
+      title: 'Xác nhận unblock user',
+      content: 'Bạn có chắc chắn muốn unblock user này?',
+      onOk: async () => {
+        try {
+          await userService.unblockUser(userId);
+          await loadUsers(); // Reload data after action
+          notify('success', { description: 'User đã được unblock thành công!' });
+        } catch (error) {
+          console.error('Error unblocking user:', error);
+          notify('error', { description: 'Có lỗi xảy ra khi unblock user: ' + error.message });
+        }
+      },
+    });
   };
 
   const handleSaveUser = async (userData) => {
     try {
-      if (isEditing) {
-        // Update existing user
-        await userService.updateUser(selectedUser.userId, userData);
-        alert('User đã được cập nhật thành công!');
-      } else {
-        // Create new user
-        await userService.createUser(userData);
-        alert('User đã được tạo thành công!');
-      }
+      // Update existing user only
+      await userService.updateUser(selectedUser.userId, userData);
+      notify('success', { description: 'User đã được cập nhật thành công!' });
       await loadUsers(); // Reload data after action
       setShowModal(false);
     } catch (error) {
       console.error('Error saving user:', error);
-      alert('Có lỗi xảy ra khi lưu user: ' + error.message);
+      notify('error', { description: 'Có lỗi xảy ra khi lưu user: ' + error.message });
     }
   };
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString || dateString === null || dateString === undefined) return 'N/A';
+    
     try {
-      return new Date(dateString).toLocaleDateString('vi-VN', {
+      let date;
+      
+      // Handle ISO string format from backend  
+      if (typeof dateString === 'string') {
+        date = new Date(dateString);
+      } else if (typeof dateString === 'number') {
+        // Handle timestamp
+        date = new Date(dateString);
+      } else {
+        return 'Định dạng không hợp lệ';
+      }
+      
+      if (isNaN(date.getTime())) {
+        return 'Ngày không hợp lệ';
+      }
+      
+      return date.toLocaleDateString('vi-VN', {
         year: 'numeric',
-        month: '2-digit',
+        month: '2-digit', 
         day: '2-digit',
         hour: '2-digit',
         minute: '2-digit'
       });
     } catch (error) {
-      return 'Ngày không hợp lệ';
+      console.error('Error formatting date:', error);
+      return 'Lỗi định dạng';
     }
   };
 
@@ -155,10 +171,6 @@ const UserManagement = () => {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <button className="btn btn-primary" onClick={handleCreateUser}>
-            <Plus size={20} />
-            Thêm User
-          </button>
         </div>
       </div>
 
@@ -193,12 +205,12 @@ const UserManagement = () => {
                   </span>
                 </td>
                 <td>
-                  <span className={`status-badge ${user.isActive ? 'status-active' : 'status-inactive'}`}>
-                    {user.isActive ? 'Hoạt động' : 'Bị khóa'}
+                  <span className={`status-badge ${user.active === true ? 'status-active' : 'status-inactive'}`}>
+                    {user.active === true ? 'Hoạt động' : 'Bị khóa'}
                   </span>
                 </td>
-                <td>{formatDate(user.createdDate)}</td>
-                <td>{formatDate(user.updateDate)}</td>
+                <td>{formatDate(user.createdAt)}</td>
+                <td>{formatDate(user.updatedAt)}</td>
                 <td>
                   <div className="action-buttons">
                     <button
@@ -208,7 +220,7 @@ const UserManagement = () => {
                     >
                       <Edit size={16} />
                     </button>
-                    {user.isActive ? (
+                    {user.active === true ? (
                       <button
                         className="action-btn btn-warning"
                         onClick={() => handleBlockUser(user.userId)}
@@ -243,7 +255,7 @@ const UserManagement = () => {
       {showModal && (
         <UserModal
           user={selectedUser}
-          isEditing={isEditing}
+          isEditing={true}
           onSave={handleSaveUser}
           onClose={() => setShowModal(false)}
         />

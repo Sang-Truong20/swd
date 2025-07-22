@@ -23,7 +23,7 @@ const ChatWidget = ({ hasPackage = true }) => {
     if (hasPackage) {
       setOpen(true);
     } else {
-      window.alert('Bạn cần mua gói dịch vụ để sử dụng chat bot!');
+      notify('warning', { description: 'Bạn cần mua gói dịch vụ để sử dụng chat bot!' });
     }
   };
 

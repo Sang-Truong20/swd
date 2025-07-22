@@ -15,8 +15,8 @@ const MemberInfo = lazy(() => import('../pages/member/MemberInfo'));
 const ChangePassword = lazy(() => import('../pages/member/ChangePassword'));
 const PackageManager = lazy(() => import('../pages/member/PackageManager'));
 const AdminHome = lazy(() => import('../pages/admin'));
-const LawsPage = lazy(() => import('../pages/laws/LawsList'));
-const LawDetail = lazy(() => import('../pages/laws/LawDetail'));
+const LawsPage = lazy(() => import('../pages/laws'));
+const LawDetail = lazy(() => import('../pages/laws/detail'));
 const PaymentPage = lazy(() => import('../pages/payment/vnpay'));
 const MomoReturn = lazy(() => import('../pages/payment/momo'));
 
