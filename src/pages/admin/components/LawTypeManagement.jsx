@@ -114,6 +114,7 @@ const LawTypeManagement = () => {
       title: 'Tên loại văn bản',
       dataIndex: 'name',
       key: 'name',
+      width: 200,
       render: (text) => (
         <div className="flex items-center">
           <TagOutlined className="mr-2 text-blue-600" />

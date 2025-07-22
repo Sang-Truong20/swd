@@ -98,7 +98,8 @@ const LawsManagement = () => {
     setLoading(true);
     try {
       const criteria = Object.fromEntries(
-        Object.entries(searchParams).filter(([_, value]) => value)
+        Object.entries(searchParams)
+          .filter(([_, value]) => value !== '' && value !== null)
       );
       
       const response = await lawService.searchLaws(
@@ -150,15 +151,15 @@ const LawsManagement = () => {
     }
   };
 
-  const handleChangeStatus = async (lawId, newStatus) => {
-    try {
-      await lawService.changeLawStatus(lawId, newStatus);
-      message.success('Thay đổi trạng thái thành công');
-      loadLaws();
-    } catch (error) {
-      message.error('Thay đổi trạng thái thất bại: ' + error.message);
-    }
-  };
+  // const handleChangeStatus = async (lawId, newStatus) => {
+  //   try {
+  //     await lawService.changeLawStatus(lawId, newStatus);
+  //     message.success('Thay đổi trạng thái thành công');
+  //     loadLaws();
+  //   } catch (error) {
+  //     message.error('Thay đổi trạng thái thất bại: ' + error.message);
+  //   }
+  // };
 
   const handleSubmit = async (values) => {
     try {
@@ -298,7 +299,7 @@ const LawsManagement = () => {
           >
             Sửa
           </Button>
-          <Select
+          {/* <Select
             size="small"
             value={record.status}
             style={{ width: 90 }}
@@ -307,7 +308,7 @@ const LawsManagement = () => {
             <Option value="DRAFT">Nháp</Option>
             <Option value="VALID">Hiệu lực</Option>
             <Option value="EXPIRED">Hết hạn</Option>
-          </Select>
+          </Select> */}
           <Popconfirm
             title="Bạn có chắc muốn xóa văn bản này?"
             onConfirm={() => handleDelete(record.lawId)}

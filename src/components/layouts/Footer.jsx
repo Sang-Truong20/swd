@@ -22,14 +22,14 @@ const Footer = () => {
                   SmartLawGT
                 </span>
                 <p className="text-blue-200 text-sm mt-1">
-                  Hệ thống tư vấn pháp luật thông minh
+                  Hệ thống tư vấn văn bản pháp luật giao thông
                 </p>
               </div>
             </div>
 
             <p className="text-slate-300 leading-relaxed max-w-md">
               SmartLawGT cung cấp giải pháp công nghệ hàng đầu giúp bạn tra cứu,
-              tìm hiểu và giải đáp mọi thắc mắc về pháp luật Việt Nam một cách
+              tìm hiểu và giải đáp mọi thắc mắc về văn bản luật giao thông một cách
               nhanh chóng và chính xác.
             </p>
 

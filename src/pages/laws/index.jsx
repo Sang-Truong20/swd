@@ -15,6 +15,7 @@ import {
   Divider,
   message
 } from 'antd';
+import { useLocation } from 'react-router-dom';
 import { 
   SearchOutlined, 
   FileTextOutlined, 
@@ -36,19 +37,25 @@ const LawsPage = () => {
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({
     current: 1,
-    pageSize: 12,
+    pageSize: 8,
     total: 0
   });
-  const [searchParams, setSearchParams] = useState({
-    lawNumber: '',
-    lawTypeId: '',
-    issuingBody: ''
-  });
+  const [searchKeyword, setSearchKeyword] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Load law types for filter
   useEffect(() => {
     loadLawTypes();
+    // Kiểm tra param search trên URL
+    const params = new URLSearchParams(location.search);
+    const keyword = params.get('search');
+    if (keyword) {
+      setSearchKeyword(keyword);
+      setTimeout(() => {
+        handleSearch(keyword);
+      }, 0);
+    }
   }, []);
 
   // Load laws when pagination or search changes
@@ -76,19 +83,22 @@ const LawsPage = () => {
         'effectiveDate',
         'DESC'
       );
-      
       const data = response.data || response;
       if (data.content) {
-        // Filter only VALID status laws for public view
+        // Chỉ lọc VALID cho hiển thị, nhưng dùng totalElements từ backend cho phân trang
         const validLaws = data.content.filter(law => law.status === 'VALID');
+        setLaws(validLaws);
+        setPagination(prev => ({
+          ...prev,
+          total: data.totalElements || validLaws.length
+        }));
+      } else if (Array.isArray(data)) {
+        const validLaws = data.filter(law => law.status === 'VALID');
         setLaws(validLaws);
         setPagination(prev => ({
           ...prev,
           total: validLaws.length
         }));
-      } else if (Array.isArray(data)) {
-        const validLaws = data.filter(law => law.status === 'VALID');
-        setLaws(validLaws);
       }
     } catch (error) {
       console.error('Error loading laws:', error);
@@ -99,22 +109,16 @@ const LawsPage = () => {
     }
   };
 
-  const handleSearch = async () => {
+  const handleSearch = async (keyword) => {
     setLoading(true);
     try {
-      const criteria = Object.fromEntries(
-        Object.entries(searchParams).filter(([_, value]) => value)
-      );
-      
       const response = await lawService.searchLaws(
-        criteria,
-        0, // Reset to first page
+        { keyword },
+        0,
         pagination.pageSize
       );
-      
       const data = response.data || response;
       if (data.content) {
-        // Filter only VALID status laws for public view
         const validLaws = data.content.filter(law => law.status === 'VALID');
         setLaws(validLaws);
         setPagination(prev => ({
@@ -135,11 +139,7 @@ const LawsPage = () => {
   };
 
   const handleResetSearch = () => {
-    setSearchParams({
-      lawNumber: '',
-      lawTypeId: '',
-      issuingBody: ''
-    });
+    setSearchKeyword('');
     setPagination(prev => ({ ...prev, current: 1 }));
     loadLaws();
   };
@@ -150,10 +150,10 @@ const LawsPage = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'VALID': return 'success';
-      case 'DRAFT': return 'warning';
-      case 'EXPIRED': return 'error';
-      default: return 'default';
+      case 'VALID': return '#52c41a'; // xanh lá
+      case 'DRAFT': return '#faad14'; // vàng
+      case 'EXPIRED': return '#f5222d'; // đỏ
+      default: return '#d9d9d9'; // xám
     }
   };
 
@@ -182,65 +182,28 @@ const LawsPage = () => {
 
         {/* Search Section */}
         <Card className="mb-6 shadow-sm">
-          <Row gutter={[16, 16]}>
-            <Col xs={24} sm={12} md={6}>
-              <Input
-                placeholder="Số văn bản"
-                prefix={<SearchOutlined />}
-                value={searchParams.lawNumber}
-                onChange={(e) => setSearchParams(prev => ({
-                  ...prev,
-                  lawNumber: e.target.value
-                }))}
-                onPressEnter={handleSearch}
-              />
-            </Col>
-            <Col xs={24} sm={12} md={6}>
-              <Select
-                placeholder="Loại văn bản"
-                style={{ width: '100%' }}
-                value={searchParams.lawTypeId}
-                onChange={(value) => setSearchParams(prev => ({
-                  ...prev,
-                  lawTypeId: value
-                }))}
-                allowClear
-              >
-                {lawTypes.map(type => (
-                  <Option key={type.lawTypeId} value={type.lawTypeId}>
-                    {type.name}
-                  </Option>
-                ))}
-              </Select>
-            </Col>
-            <Col xs={24} sm={12} md={6}>
-              <Input
-                placeholder="Cơ quan ban hành"
-                prefix={<BankOutlined />}
-                value={searchParams.issuingBody}
-                onChange={(e) => setSearchParams(prev => ({
-                  ...prev,
-                  issuingBody: e.target.value
-                }))}
-                onPressEnter={handleSearch}
-              />
-            </Col>
-            <Col xs={24} sm={12} md={6}>
-              <Space>
-                <Button 
-                  type="primary" 
-                  icon={<SearchOutlined />}
-                  onClick={handleSearch}
-                >
-                  Tìm kiếm
-                </Button>
+          <Row justify="center">
+            <Col xs={24}>
+              <div style={{ display: 'flex', alignItems: 'center', maxWidth: '1000px', margin: '0 auto', gap: 8 }}>
+                <Input.Search
+                  placeholder="Nhập từ khóa tìm kiếm văn bản pháp luật..."
+                  value={searchKeyword}
+                  onChange={e => setSearchKeyword(e.target.value)}
+                  onSearch={value => handleSearch(value)}
+                  enterButton={<Button type="primary" icon={<SearchOutlined />}>Tìm kiếm</Button>}
+                  size="large"
+                  allowClear
+                  style={{ flex: 1 }}
+                />
                 <Button 
                   icon={<FilterOutlined />}
                   onClick={handleResetSearch}
+                  size="large"
+                  style={{ height: 40, padding: '0 16px' }}
                 >
                   Đặt lại
                 </Button>
-              </Space>
+              </div>
             </Col>
           </Row>
         </Card>
@@ -250,70 +213,72 @@ const LawsPage = () => {
           {laws.length > 0 ? (
             <>
               <Row gutter={[24, 24]}>
-                {laws.map(law => (
-                  <Col xs={24} sm={12} lg={8} xl={6} key={law.lawId}>
-                    <Card
-                      hoverable
-                      className="h-full"
-                      actions={[
-                        <Button 
-                          type="link" 
-                          icon={<EyeOutlined />}
-                          onClick={() => handleViewDetail(law)}
-                        >
-                          Xem chi tiết
-                        </Button>
-                      ]}
-                    >
-                      <div className="mb-3">
-                        <Tag color="blue" icon={<FileTextOutlined />}>
-                          {law.lawTypeName || 'Văn bản'}
-                        </Tag>
-                        <Tag color={getStatusColor(law.status)}>
-                          {getStatusText(law.status)}
-                        </Tag>
-                      </div>
-                      
-                      <Title level={5} className="!mb-2 text-blue-600">
-                        {law.lawNumber}
-                      </Title>
-                      
-                      <div className="text-gray-600 mb-2">
-                        <BankOutlined className="mr-1" />
-                        <Text>{law.issuingBody}</Text>
-                      </div>
-                      
-                      <div className="text-gray-500 mb-3">
-                        <CalendarOutlined className="mr-1" />
-                        <Text className="text-sm">
-                          Hiệu lực: {law.effectiveDate ? dayjs(law.effectiveDate).format('DD/MM/YYYY') : '---'}
-                        </Text>
-                      </div>
-                      
-                      {law.description && (
-                        <Paragraph 
-                          ellipsis={{ rows: 2, tooltip: law.description }}
-                          className="text-gray-600 text-sm !mb-0"
-                        >
-                          {law.description}
-                        </Paragraph>
-                      )}
-                    </Card>
-                  </Col>
-                ))}
+                {laws
+                  .slice(
+                    (pagination.current - 1) * pagination.pageSize,
+                    pagination.current * pagination.pageSize
+                  )
+                  .map(law => (
+                    <Col xs={24} sm={12} lg={8} xl={6} key={law.lawId}>
+                      <Card
+                        hoverable
+                        className="h-full"
+                        actions={[
+                          <Button 
+                            type="link" 
+                            icon={<EyeOutlined />}
+                            onClick={() => handleViewDetail(law)}
+                          >
+                            Xem chi tiết
+                          </Button>
+                        ]}
+                      >
+                        <div className="mb-3">
+                          <Tag color="blue" icon={<FileTextOutlined />}>
+                            {law.lawTypeName || 'Văn bản'}
+                          </Tag>
+                          <Tag style={{ background: getStatusColor(law.status), color: '#fff', border: 'none', fontWeight: 500 }}>
+                            {getStatusText(law.status)}
+                          </Tag>
+                        </div>
+                        <Title level={5} className="!mb-2" style={{ color: '#1890ff', background: '#e6f7ff', padding: '2px 8px', borderRadius: 6, display: 'inline-block' }}>
+                          {law.lawNumber}
+                        </Title>
+                        <div className="text-gray-600 mb-2">
+                          <BankOutlined className="mr-1" />
+                          <Text>{law.issuingBody}</Text>
+                        </div>
+                        <div className="text-gray-500 mb-3">
+                          <CalendarOutlined className="mr-1" />
+                          <Text className="text-sm">
+                            Hiệu lực: {law.effectiveDate ? dayjs(law.effectiveDate).format('DD/MM/YYYY') : '---'}
+                          </Text>
+                        </div>
+                        {law.description && (
+                          <Paragraph 
+                            ellipsis={{ rows: 2, tooltip: law.description }}
+                            className="text-gray-600 text-sm !mb-0"
+                          >
+                            {law.description}
+                          </Paragraph>
+                        )}
+                      </Card>
+                    </Col>
+                  ))}
               </Row>
 
               {/* Pagination */}
-              <div className="mt-8 text-center">
+              <div className="mt-8 flex justify-end">
                 <Pagination
                   current={pagination.current}
                   pageSize={pagination.pageSize}
                   total={pagination.total}
                   showSizeChanger
                   showQuickJumper
-                  showTotal={(total, range) => 
-                    `${range[0]}-${range[1]} trong ${total} văn bản`
-                  }
+                  showTotal={(total, range) => {
+                    if (total === 0) return '';
+                    return `${range[0]}-${range[1]} của ${total} văn bản`;
+                  }}
                   onChange={(page, size) => {
                     setPagination(prev => ({
                       ...prev,
@@ -321,7 +286,9 @@ const LawsPage = () => {
                       pageSize: size
                     }));
                   }}
-                  pageSizeOptions={['12', '24', '48', '96']}
+                  pageSizeOptions={['8', '16', '32', '64']}
+                  // Cho phép chuyển trang kể cả khi total = 0
+                  disabled={false}
                 />
               </div>
             </>
