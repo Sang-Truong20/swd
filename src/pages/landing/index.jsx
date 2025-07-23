@@ -90,10 +90,11 @@ const LandingPage = () => {
         <div className="max-w-4xl mx-auto px-4 text-center">
           <div className="animate-fade-in">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-              Tra cứu tư vấn văn bản pháp luật giao thông 
+              Tra cứu tư vấn văn bản pháp luật giao thông
             </h2>
             <p className="text-lg text-gray-600 mb-8">
-              Nhập từ khóa để tìm kiếm các quy định, văn bản pháp luật giao thông phù hợp
+              Nhập từ khóa để tìm kiếm các quy định, văn bản pháp luật giao
+              thông phù hợp
             </p>
             <div className="max-w-2xl mx-auto">
               <Search
@@ -114,7 +115,8 @@ const LandingPage = () => {
               />
             </div>
             <p className="text-sm text-gray-500 mt-4">
-              Ví dụ: "xử phạt vi phạm giao thông", "quy định tốc độ", "bằng lái xe máy"
+              Ví dụ: "xử phạt vi phạm giao thông", "quy định tốc độ", "bằng lái
+              xe máy"
             </p>
           </div>
         </div>
@@ -152,7 +154,9 @@ const LandingPage = () => {
         </div>
       </section>
 
-      <Packages />
+      <section id="packages-section">
+        <Packages />
+      </section>
 
       {/* Statistics Section */}
       <section className="py-16 bg-gradient-to-r from-blue-600 to-indigo-700">

@@ -1,4 +1,4 @@
-import { memo, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { FaComments } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { PATH_NAME } from '../constants';
@@ -8,8 +8,17 @@ import { notify } from '../utils';
 
 const ChatWidget = ({ hasPackage = true }) => {
   const [open, setOpen] = useState(false);
+  const [width, setWidth] = useState(window.innerWidth);
   const { userInfo } = useUserData();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleWindowResize = () => setWidth(window.innerWidth);
+    window.addEventListener('resize', handleWindowResize);
+    return () => window.removeEventListener('resize', handleWindowResize);
+  }, []);
+
+  const isMobile = width <= 640;
 
   const handleOpen = () => {
     if (!userInfo) {
@@ -23,7 +32,13 @@ const ChatWidget = ({ hasPackage = true }) => {
     if (hasPackage) {
       setOpen(true);
     } else {
-      notify('warning', { description: 'Bạn cần mua gói dịch vụ để sử dụng chat bot!' });
+      navigate('/', { replace: true });
+      setTimeout(() => {
+        const el = document.getElementById('packages-section');
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
     }
   };
 
@@ -39,10 +54,26 @@ const ChatWidget = ({ hasPackage = true }) => {
         </button>
       )}
       <div
-        className={`fixed bottom-6 right-6 z-50 w-full max-w-md sm:max-w-lg bg-white rounded-3xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden animate-fade-in transition-all duration-300 ${
-          open ? '' : 'hidden'
-        }`}
-        style={{ height: '80vh', maxHeight: 800 }}
+        className={`fixed z-50 transition-all duration-300 ${open ? '' : 'hidden'}
+                w-full max-w-md sm:max-w-md h-[70vh] max-h-[800px] bottom-6 right-6 rounded-none shadow-2xl border border-gray-200 flex flex-col overflow-hidden
+                sm:bottom-6 sm:right-6 sm:rounded-3xl sm:w-full sm:h-[70vh] sm:max-h-[800px]
+                mobile:inset-0 mobile:w-full mobile:h-full mobile:rounded-none mobile:max-w-none mobile:max-h-none
+              `}
+        style={{
+          ...(isMobile
+            ? {
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                width: '100vw',
+                height: '100vh',
+                borderRadius: 0,
+                maxWidth: 'none',
+                maxHeight: 'none',
+              }
+            : {}),
+        }}
       >
         <div className="flex-1 min-h-0">
           <ChatBot onClose={() => setOpen(false)} />
