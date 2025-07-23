@@ -32,6 +32,9 @@ const ChatWidget = ({ hasPackage = true }) => {
     if (hasPackage) {
       setOpen(true);
     } else {
+      notify('info', {
+        description: 'Vui lòng mua gói để sử dụng dịch vụ',
+      });
       navigate('/', { replace: true });
       setTimeout(() => {
         const el = document.getElementById('packages-section');
