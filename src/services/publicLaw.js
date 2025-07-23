@@ -81,12 +81,10 @@ export const lawService = {
 // Law Type Service
 export const lawTypeService = {
   async getAllLawTypes() {
-    try {
+
       const response = await axiosClient.get('/query/law-type');
       return response.data;
-    } catch (error) {
-      throw new Error(error.response?.data?.message || 'Không thể tải danh sách loại văn bản');
-    }
+
   }
 };
 
