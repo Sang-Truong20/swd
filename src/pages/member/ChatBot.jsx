@@ -5,6 +5,18 @@ import { chatWithGemini, getChatHistory } from '../../services/chat';
 import { formatDateChatBot, getDateKey } from '../../utils/index';
 import { quickOptions } from './constants/index';
 
+export const formatMarkdown = (text) => {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+
+  return parts.map((part, index) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      const content = part.slice(2, -2);
+      return <strong key={index}>{content}</strong>;
+    }
+    return <span key={index}>{part}</span>;
+  });
+};
+
 const ChatBot = ({ onClose }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -351,16 +363,15 @@ const ChatBot = ({ onClose }) => {
   return (
     <div className="w-full h-full max-w-4xl mx-auto">
       <div
-        className={`bg-white rounded-3xl shadow-2xl w-full h-full flex flex-col overflow-hidden border-0 ${
+        className={`bg-white rounded-none sm:rounded-3xl shadow-2xl w-full h-full flex flex-col overflow-hidden border-0 ${
           showAnimation ? 'animate-pulse' : ''
         }`}
       >
         <div className="relative bg-blue-700 p-6">
-          <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
           <div className="relative flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="relative">
-                <div className="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-lg border border-white/30">
+                <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-lg border border-white/30">
                   <FaBalanceScale className="text-white text-xl" />
                 </div>
                 <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-white flex items-center justify-center">
@@ -470,7 +481,7 @@ const ChatBot = ({ onClose }) => {
                     }`}
                   >
                     <p className="text-sm leading-relaxed break-words whitespace-pre-wrap">
-                      {mainMessage}
+                      {formatMarkdown(mainMessage)}
                     </p>
                   </div>
                   <div
