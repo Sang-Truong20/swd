@@ -110,33 +110,96 @@ const LawsPage = () => {
   };
 
   const handleSearch = async (keyword) => {
-    setLoading(true);
-    try {
-      const response = await lawService.searchLaws(
-        { keyword },
-        0,
-        pagination.pageSize
-      );
-      const data = response.data || response;
-      if (data.content) {
-        const validLaws = data.content.filter(law => law.status === 'VALID');
-        setLaws(validLaws);
-        setPagination(prev => ({
-          ...prev,
-          current: 1,
-          total: validLaws.length
-        }));
-      } else if (Array.isArray(data)) {
-        const validLaws = data.filter(law => law.status === 'VALID');
-        setLaws(validLaws);
-      }
-    } catch (error) {
-      console.error('Search error:', error);
-      message.error('Tìm kiếm thất bại');
-    } finally {
-      setLoading(false);
+  if (!keyword || keyword.trim() === '') {
+    // Nếu không có keyword, load lại danh sách ban đầu
+    handleResetSearch();
+    return;
+  }
+
+  setLoading(true);
+  try {
+    // Gọi API search qua service
+    const response = await lawService.searchLaws(
+      { keyword: keyword.trim() },
+      0,
+      pagination.pageSize,
+      'effectiveDate',
+      'DESC'
+    );
+
+    const data = response.data || response;
+    
+    if (data && data.content) {
+      // Backend trả về pagination object
+      const validLaws = data.content.filter(law => law.status === 'VALID');
+      setLaws(validLaws);
+      setPagination(prev => ({
+        ...prev,
+        current: 1,
+        total: data.totalElements || validLaws.length
+      }));
+    } else if (Array.isArray(data)) {
+      // Backend trả về array trực tiếp
+      const validLaws = data.filter(law => law.status === 'VALID');
+      setLaws(validLaws);
+      setPagination(prev => ({
+        ...prev,
+        current: 1,
+        total: validLaws.length
+      }));
+    } else {
+      // Không có kết quả
+      setLaws([]);
+      setPagination(prev => ({
+        ...prev,
+        current: 1,
+        total: 0
+      }));
     }
-  };
+    
+  } catch (error) {
+    console.error('Search error:', error);
+    
+    // Fallback: search trong danh sách hiện tại
+    try {
+      const allLawsResponse = await lawService.getValidLaws(0, 1000); // Lấy nhiều records để search
+      const allData = allLawsResponse.data || allLawsResponse;
+      const allLaws = allData.content || allData || [];
+      
+      // Filter locally
+      const filteredLaws = allLaws.filter(law => {
+        const searchText = keyword.toLowerCase().trim();
+        return law.status === 'VALID' && (
+          (law.lawNumber && law.lawNumber.toLowerCase().includes(searchText)) ||
+          (law.description && law.description.toLowerCase().includes(searchText)) ||
+          (law.issuingBody && law.issuingBody.toLowerCase().includes(searchText)) ||
+          (law.lawTypeName && law.lawTypeName.toLowerCase().includes(searchText))
+        );
+      });
+      
+      setLaws(filteredLaws);
+      setPagination(prev => ({
+        ...prev,
+        current: 1,
+        total: filteredLaws.length
+      }));
+      
+      message.info(`Đã tìm kiếm, tìm thấy ${filteredLaws.length} kết quả`);
+      
+    } catch (fallbackError) {
+      console.error('Fallback search failed:', fallbackError);
+      setLaws([]);
+      setPagination(prev => ({
+        ...prev,
+        current: 1,
+        total: 0
+      }));
+      message.error('Không thể thực hiện tìm kiếm');
+    }
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleResetSearch = () => {
     setSearchKeyword('');

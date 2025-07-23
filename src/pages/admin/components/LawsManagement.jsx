@@ -47,7 +47,7 @@ const LawsManagement = () => {
   });
   const [searchParams, setSearchParams] = useState({
     lawNumber: '',
-    lawTypeId: '',
+    lawTypeName: '',
     status: '',
     issuingBody: ''
   });
@@ -101,13 +101,13 @@ const LawsManagement = () => {
         Object.entries(searchParams)
           .filter(([_, value]) => value !== '' && value !== null)
       );
-      
+      // Log giá trị và kiểu dữ liệu lawTypeName để debug
+      console.log('Search lawTypeName:', criteria.lawTypeName, typeof criteria.lawTypeName);
       const response = await lawService.searchLaws(
         criteria,
         pagination.current - 1,
         pagination.pageSize
       );
-      
       if (response.content) {
         setLaws(response.content);
         setPagination(prev => ({
@@ -204,6 +204,52 @@ const LawsManagement = () => {
     }
   };
 
+  // Custom date validation functions
+  const validateIssueDate = (_, value) => {
+    if (!value) {
+      return Promise.resolve();
+    }
+    
+    const effectiveDate = form.getFieldValue('effectiveDate');
+    if (effectiveDate && value.isAfter(effectiveDate)) {
+      return Promise.reject(new Error('Ngày ban hành phải nhỏ hơn ngày có hiệu lực'));
+    }
+    
+    return Promise.resolve();
+  };
+
+  const validateEffectiveDate = (_, value) => {
+    if (!value) {
+      return Promise.reject(new Error('Vui lòng chọn ngày có hiệu lực'));
+    }
+    
+    const issueDate = form.getFieldValue('issueDate');
+    const expiryDate = form.getFieldValue('expiryDate');
+    
+    if (issueDate && value.isBefore(issueDate)) {
+      return Promise.reject(new Error('Ngày có hiệu lực phải lớn hơn ngày ban hành'));
+    }
+    
+    if (expiryDate && value.isAfter(expiryDate)) {
+      return Promise.reject(new Error('Ngày có hiệu lực phải nhỏ hơn ngày hết hiệu lực'));
+    }
+    
+    return Promise.resolve();
+  };
+
+  const validateExpiryDate = (_, value) => {
+    if (!value) {
+      return Promise.resolve();
+    }
+    
+    const effectiveDate = form.getFieldValue('effectiveDate');
+    if (effectiveDate && value.isBefore(effectiveDate)) {
+      return Promise.reject(new Error('Ngày hết hiệu lực phải lớn hơn ngày có hiệu lực'));
+    }
+    
+    return Promise.resolve();
+  };
+
   const columns = [
     {
       title: 'Số văn bản',
@@ -264,13 +310,13 @@ const LawsManagement = () => {
         </Tag>
       ),
     },
-    {
-      title: 'Người tạo',
-      dataIndex: 'createdByUserName',
-      key: 'createdByUserName',
-      width: 120,
-      render: (text) => text || '---',
-    },
+    // {
+    //   title: 'Người tạo',
+    //   dataIndex: 'createdByUserName',
+    //   key: 'createdByUserName',
+    //   width: 120,
+    //   render: (text) => text || '---',
+    // },
     {
       title: 'Ngày tạo',
       dataIndex: 'createdDate',
@@ -361,17 +407,17 @@ const LawsManagement = () => {
           </Col>
           <Col xs={24} sm={12} md={6}>
             <Select
-              placeholder="Loại văn bản"
-              value={searchParams.lawTypeId}
+              placeholder="Chọn loại văn bản"
+              value={searchParams.lawTypeName || undefined}
               onChange={(value) => setSearchParams(prev => ({
                 ...prev,
-                lawTypeId: value
+                lawTypeName: value === undefined ? undefined : value
               }))}
               style={{ width: '100%' }}
               allowClear
             >
               {lawTypes.map(type => (
-                <Option key={type.lawTypeId} value={type.lawTypeId}>
+                <Option key={type.lawTypeId} value={type.name}>
                   {type.name}
                 </Option>
               ))}
@@ -379,11 +425,11 @@ const LawsManagement = () => {
           </Col>
           <Col xs={24} sm={12} md={6}>
             <Select
-              placeholder="Trạng thái"
-              value={searchParams.status}
+              placeholder="Chọn trạng thái"
+              value={searchParams.status || undefined}
               onChange={(value) => setSearchParams(prev => ({
                 ...prev,
-                status: value
+                status: value === undefined ? undefined : value
               }))}
               style={{ width: '100%' }}
               allowClear
@@ -419,7 +465,7 @@ const LawsManagement = () => {
               onClick={() => {
                 setSearchParams({
                   lawNumber: '',
-                  lawTypeId: '',
+                  lawTypeName: '',
                   status: '',
                   issuingBody: ''
                 });
@@ -480,13 +526,17 @@ const LawsManagement = () => {
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
-                name="lawTypeId"
-                label="Loại văn bản"
+                name="lawTypeName"
+                label={
+                  <span>
+                    Loại văn bản <span style={{ color: 'red' }}>*</span>
+                  </span>
+                }
                 rules={[{ required: true, message: 'Vui lòng chọn loại văn bản' }]}
               >
                 <Select placeholder="Chọn loại văn bản">
                   {lawTypes.map(type => (
-                    <Option key={type.lawTypeId} value={type.lawTypeId}>
+                    <Option key={type.lawTypeId} value={type.name}>
                       {type.name}
                     </Option>
                   ))}
@@ -496,8 +546,18 @@ const LawsManagement = () => {
             <Col span={12}>
               <Form.Item
                 name="lawNumber"
-                label="Số văn bản"
-                rules={[{ required: true, message: 'Vui lòng nhập số văn bản' }]}
+                label={
+                  <span>
+                    Số văn bản <span style={{ color: 'red' }}>*</span>
+                  </span>
+                }
+                rules={[
+                  { required: true, message: 'Vui lòng nhập số văn bản' },
+                  { 
+                    pattern: /^[a-zA-Z0-9\/\-\s]+$/, 
+                    message: 'Số văn bản chỉ được chứa chữ cái, số, dấu gạch ngang và dấu gạch chéo' 
+                  }
+                ]}
               >
                 <Input placeholder="Ví dụ: 01/2024/QH15" />
               </Form.Item>
@@ -508,8 +568,16 @@ const LawsManagement = () => {
             <Col span={12}>
               <Form.Item
                 name="issuingBody"
-                label="Cơ quan ban hành"
-                rules={[{ required: true, message: 'Vui lòng nhập cơ quan ban hành' }]}
+                label={
+                  <span>
+                    Cơ quan ban hành <span style={{ color: 'red' }}>*</span>
+                  </span>
+                }
+                rules={[
+                  { required: true, message: 'Vui lòng nhập cơ quan ban hành' },
+                  { min: 3, message: 'Tên cơ quan ban hành phải có ít nhất 3 ký tự' },
+                  { max: 200, message: 'Tên cơ quan ban hành không được vượt quá 200 ký tự' }
+                ]}
               >
                 <Input placeholder="Ví dụ: Quốc hội" />
               </Form.Item>
@@ -517,7 +585,11 @@ const LawsManagement = () => {
             <Col span={12}>
               <Form.Item
                 name="status"
-                label="Trạng thái"
+                label={
+                  <span>
+                    Trạng thái <span style={{ color: 'red' }}>*</span>
+                  </span>
+                }
                 rules={[{ required: true, message: 'Vui lòng chọn trạng thái' }]}
               >
                 <Select placeholder="Chọn trạng thái">
@@ -533,26 +605,69 @@ const LawsManagement = () => {
             <Col span={8}>
               <Form.Item
                 name="issueDate"
-                label="Ngày ban hành"
+                label={
+                  <span>
+                    Ngày ban hành <span style={{ color: 'red' }}>*</span>
+                  </span>
+                }
+                rules={[
+                  { required: true, message: 'Vui lòng chọn ngày ban hành' },
+                  { validator: validateIssueDate }
+                ]}
               >
-                <DatePicker style={{ width: '100%' }} />
+                <DatePicker 
+                  style={{ width: '100%' }} 
+                  format="DD/MM/YYYY"
+                  onChange={() => {
+                    // Trigger validation for related fields
+                    form.validateFields(['effectiveDate']);
+                  }}
+                />
               </Form.Item>
             </Col>
             <Col span={8}>
               <Form.Item
                 name="effectiveDate"
-                label="Ngày có hiệu lực"
-                rules={[{ required: true, message: 'Vui lòng chọn ngày có hiệu lực' }]}
+                label={
+                  <span>
+                    Ngày có hiệu lực <span style={{ color: 'red' }}>*</span>
+                  </span>
+                }
+                rules={[
+                  { validator: validateEffectiveDate }
+                ]}
               >
-                <DatePicker style={{ width: '100%' }} />
+                <DatePicker 
+                  style={{ width: '100%' }} 
+                  format="DD/MM/YYYY"
+                  onChange={() => {
+                    // Trigger validation for related fields
+                    form.validateFields(['issueDate', 'expiryDate']);
+                  }}
+                />
               </Form.Item>
             </Col>
             <Col span={8}>
               <Form.Item
                 name="expiryDate"
-                label="Ngày hết hiệu lực"
+                label={
+                  <span>
+                    Ngày hết hiệu lực <span style={{ color: 'red' }}>*</span>
+                  </span>
+                }
+                rules={[
+                  { required: true, message: 'Vui lòng chọn ngày hết hiệu lực' },
+                  { validator: validateExpiryDate }
+                ]}
               >
-                <DatePicker style={{ width: '100%' }} />
+                <DatePicker 
+                  style={{ width: '100%' }} 
+                  format="DD/MM/YYYY"
+                  onChange={() => {
+                    // Trigger validation for related fields
+                    form.validateFields(['effectiveDate']);
+                  }}
+                />
               </Form.Item>
             </Col>
           </Row>
@@ -560,6 +675,12 @@ const LawsManagement = () => {
           <Form.Item
             name="contentUrl"
             label="URL nội dung"
+            rules={[
+              {
+                type: 'url',
+                message: 'Vui lòng nhập URL hợp lệ (ví dụ: https://example.com)'
+              }
+            ]}
           >
             <Input placeholder="https://example.com/law-content.pdf" />
           </Form.Item>
@@ -567,8 +688,16 @@ const LawsManagement = () => {
           <Form.Item
             name="description"
             label="Mô tả"
+            rules={[
+              { max: 1000, message: 'Mô tả không được vượt quá 1000 ký tự' }
+            ]}
           >
-            <TextArea rows={4} placeholder="Mô tả nội dung văn bản..." />
+            <TextArea 
+              rows={4} 
+              placeholder="Mô tả nội dung văn bản..." 
+              showCount
+              maxLength={1000}
+            />
           </Form.Item>
 
           <Form.Item className="mb-0 text-right">

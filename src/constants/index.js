@@ -31,10 +31,10 @@ const NAV_ELEMENTS = [
   //   name: 'TRỢ LÝ ẢO',
   //   path: PATH_NAME.CHAT_BOT,
   // },
-  {
-    name: 'VỀ CHÚNG TÔI',
-    path: '/contact',
-  },
+  // {
+  //   name: 'VỀ CHÚNG TÔI',
+  //   path: '/contact',
+  // },
 ];
 
 export { PATH_NAME, NAV_ELEMENTS };

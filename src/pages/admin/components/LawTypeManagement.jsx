@@ -146,18 +146,6 @@ const LawTypeManagement = () => {
       ),
     },
     {
-      title: 'Lần sử dụng cuối',
-      dataIndex: 'lastUsedDate',
-      key: 'lastUsedDate',
-      width: 140,
-      render: (date) => (
-        <div className="flex items-center">
-          <CalendarOutlined className="mr-1 text-gray-500" />
-          {date ? dayjs(date).format('DD/MM/YYYY') : 'Chưa sử dụng'}
-        </div>
-      ),
-    },
-    {
       title: 'Trạng thái',
       dataIndex: 'isDeleted',
       key: 'isDeleted',
