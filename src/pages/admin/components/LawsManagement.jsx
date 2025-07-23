@@ -526,7 +526,7 @@ const LawsManagement = () => {
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
-                name="lawTypeName"
+                name="lawTypeId"
                 label={
                   <span>
                     Loại văn bản <span style={{ color: 'red' }}>*</span>
@@ -536,7 +536,7 @@ const LawsManagement = () => {
               >
                 <Select placeholder="Chọn loại văn bản">
                   {lawTypes.map(type => (
-                    <Option key={type.lawTypeId} value={type.name}>
+                    <Option key={type.lawTypeId} value={type.lawTypeId}>
                       {type.name}
                     </Option>
                   ))}
