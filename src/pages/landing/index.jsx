@@ -11,7 +11,7 @@ import { useState } from 'react';
 import FeatureCard from '../../components/FeatureCard';
 import HeroSection from '../../components/HeroSection';
 import Packages from '../../components/Packages';
-import TestimonialsSection from '../../components/TestimonialsSection';
+//import TestimonialsSection from '../../components/TestimonialsSection';
 import { useUserData } from '../../hooks/useUserData';
 import './styles.css';
 
@@ -69,8 +69,7 @@ const LandingPage = () => {
   };
 
   const handleGetStarted = () => {
-    // Navigate to main app or registration
-    console.log('Get started clicked');
+    window.location.href = '/auth';
   };
 
   const handleLearnMore = () => {
@@ -188,7 +187,7 @@ const LandingPage = () => {
       </section>
 
       {/* Testimonials Section */}
-      <TestimonialsSection />
+      {/* <TestimonialsSection /> */}
 
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-r from-indigo-600 to-blue-700">
@@ -208,13 +207,7 @@ const LandingPage = () => {
                 onClick={handleGetStarted}
                 className="bg-yellow-500 border-yellow-500 hover:bg-yellow-600 hover:border-yellow-600 font-semibold px-8 py-3 h-auto btn-primary cta-glow"
               >
-                Dùng thử miễn phí
-              </Button>
-              <Button
-                size="large"
-                className="border-white text-white hover:bg-white hover:text-blue-700 font-semibold px-8 py-3 h-auto"
-              >
-                Liên hệ tư vấn
+                Bắt đầu ngay
               </Button>
             </div>
           </div>

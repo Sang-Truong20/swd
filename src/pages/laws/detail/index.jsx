@@ -240,9 +240,9 @@ const LawDetailPage = () => {
           {/* Metadata */}
           <Divider />
           <Row gutter={[24, 8]} className="text-sm text-gray-500">
-            <Col xs={24} sm={12}>
+            {/* <Col xs={24} sm={12}>
               <Text>Người tạo: {law.createdByUserName || '---'}</Text>
-            </Col>
+            </Col> */}
             <Col xs={24} sm={12}>
               <Text>Ngày tạo: {law.createdDate ? dayjs(law.createdDate).format('DD/MM/YYYY HH:mm') : '---'}</Text>
             </Col>
