@@ -64,14 +64,11 @@ const LawsPage = () => {
   }, [pagination.current, pagination.pageSize]);
 
   const loadLawTypes = async () => {
-    try {
+
       const response = await lawTypeService.getAllLawTypes();
       const types = response.data || response;
       setLawTypes(Array.isArray(types) ? types : []);
-    } catch (error) {
-      console.error('Error loading law types:', error);
-      message.error('Không thể tải danh sách loại văn bản');
-    }
+
   };
 
   const loadLaws = async () => {
