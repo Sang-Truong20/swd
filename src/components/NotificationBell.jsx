@@ -377,10 +377,10 @@ const NotificationBell = () => {
                             <Info size={20} className="text-blue-500" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h4 className="text-sm font-medium text-gray-900">
+                            <h4 className="text-sm break-words font-medium text-gray-900">
                               {notification.title}
                             </h4>
-                            <p className="text-sm overflow-hidden line-clamp-2 text-ellipsis text-gray-600 mt-1">
+                            <p className="text-sm overflow-hidden text-ellipsis text-gray-600 mt-1">
                               {notification.content}
                             </p>
                             <p className="text-xs text-gray-500 mt-2">
