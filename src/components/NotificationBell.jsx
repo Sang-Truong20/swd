@@ -83,7 +83,12 @@ const NotificationBell = () => {
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     retry: 1,
-    select: (data) => data?.filter((n) => n.enable),
+    select: (data) => {
+      const filteredData = data?.filter((n) => n.enable);
+      return filteredData?.sort(
+        (a, b) => new Date(b.created) - new Date(a.created),
+      );
+    },
   });
 
   const { data: unreadNotifications, isLoading: isUnreadLoading } = useQuery({
@@ -93,7 +98,12 @@ const NotificationBell = () => {
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     retry: 1,
-    select: (data) => data?.filter((n) => n.enable),
+    select: (data) => {
+      const filteredData = data?.filter((n) => n.enable);
+      return filteredData?.sort(
+        (a, b) => new Date(b.created) - new Date(a.created),
+      );
+    },
   });
 
   const { data: unreadCount, isLoading: isCountLoading } = useQuery({
@@ -110,13 +120,19 @@ const NotificationBell = () => {
     onSuccess: (data, noticeId) => {
       queryClient.setQueryData(['notices', userId], (old) => {
         if (!old) return old;
-        return old.map((n) =>
+        const updated = old.map((n) =>
           n.notificationId === noticeId ? { ...n, read: true } : n,
+        );
+        return updated.sort(
+          (a, b) => new Date(b.created) - new Date(a.created),
         );
       });
       queryClient.setQueryData(['notices-unread', userId], (old) => {
         if (!old) return old;
-        return old.filter((n) => n.notificationId !== noticeId);
+        const filtered = old.filter((n) => n.notificationId !== noticeId);
+        return filtered.sort(
+          (a, b) => new Date(b.created) - new Date(a.created),
+        );
       });
       queryClient.setQueryData(['noticeCount', userId], (old) => {
         if (!old || !old > 0) return 0;
@@ -133,14 +149,20 @@ const NotificationBell = () => {
     onSuccess: (data, noticeId) => {
       queryClient.setQueryData(['notices', userId], (old) => {
         if (!old) return old;
-        return old.map((n) =>
+        const updated = old.map((n) =>
           n.notificationId === noticeId ? { ...n, enable: false } : n,
+        );
+        return updated.sort(
+          (a, b) => new Date(b.created) - new Date(a.created),
         );
       });
       queryClient.setQueryData(['notices-unread', userId], (old) => {
         if (!old) return old;
-        return old.map((n) =>
+        const updated = old.map((n) =>
           n.notificationId === noticeId ? { ...n, enable: false } : n,
+        );
+        return updated.sort(
+          (a, b) => new Date(b.created) - new Date(a.created),
         );
       });
       queryClient.setQueryData(['noticeCount', userId], (old) => {
@@ -165,7 +187,10 @@ const NotificationBell = () => {
     onSuccess: () => {
       queryClient.setQueryData(['notices', userId], (old) => {
         if (!old) return old;
-        return old.map((n) => ({ ...n, read: true }));
+        const updated = old.map((n) => ({ ...n, read: true }));
+        return updated.sort(
+          (a, b) => new Date(b.created) - new Date(a.created),
+        );
       });
       queryClient.setQueryData(['notices-unread', userId], []);
       queryClient.setQueryData(['noticeCount', userId], 0);
