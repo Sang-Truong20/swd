@@ -652,11 +652,10 @@ const LawsManagement = () => {
                 name="expiryDate"
                 label={
                   <span>
-                    Ngày hết hiệu lực <span style={{ color: 'red' }}>*</span>
+                    Ngày hết hiệu lực 
                   </span>
                 }
                 rules={[
-                  { required: true, message: 'Vui lòng chọn ngày hết hiệu lực' },
                   { validator: validateExpiryDate }
                 ]}
               >

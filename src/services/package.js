@@ -5,7 +5,7 @@ const payment = (payload) => {
 };
 
 const getAllPackage = () => {
-  return axiosClient.get('/query/package/all');
+  return axiosClient.get('/query/package/active');
 };
 
 export { getAllPackage, payment };
