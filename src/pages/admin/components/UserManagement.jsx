@@ -183,7 +183,7 @@ const UserManagement = () => {
               <th>Username</th>
               <th>Email</th>
               <th>Tên đầy đủ</th>
-              <th>Role</th>
+              <th>Vai trò</th>
               <th>Trạng thái</th>
               <th>Ngày tạo</th>
               <th>Ngày cập nhật</th>

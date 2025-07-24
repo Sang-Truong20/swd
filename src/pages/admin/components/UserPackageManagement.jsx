@@ -262,7 +262,7 @@ const UserPackageManagement = () => {
           <table className="table">
             <thead>
               <tr>
-                <th>User</th>
+                <th>Người dùng</th>
                 <th>Gói dịch vụ</th>
                 <th>Giá</th>
                 <th>Giới hạn</th>
