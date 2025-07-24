@@ -1,8 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Badge, Divider, Dropdown, message, Modal, Spin } from 'antd';
-import { ArrowLeft, BellOff, Info, MoreHorizontal } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
 import {
+  ArrowLeft,
+  BellOff,
+  Check,
+  Info,
+  MoreHorizontal,
+  Trash2,
+} from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  deleteNotice,
   getNoticeByUser,
   getNoticeCount,
   getUnreadNoticeByUser,
@@ -16,6 +24,7 @@ const NotificationBell = () => {
   const [selectedNotice, setSelectedNotice] = useState(null);
   const [showUnread, setShowUnread] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [itemMenuOpen, setItemMenuOpen] = useState({});
   const queryClient = useQueryClient();
   const dropdownRef = useRef(null);
 
@@ -35,8 +44,20 @@ const NotificationBell = () => {
         }
       }
 
+      const hasOpenItemMenu = Object.values(itemMenuOpen).some(Boolean);
+      if (hasOpenItemMenu) {
+        const itemMenuElements = document.querySelectorAll('.ant-dropdown');
+        const isClickingInsideItemMenu = Array.from(itemMenuElements).some(
+          (element) => element.contains(event.target),
+        );
+        if (isClickingInsideItemMenu) {
+          return;
+        }
+      }
+
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsOpen(false);
+        setItemMenuOpen({});
       }
     };
 
@@ -49,7 +70,7 @@ const NotificationBell = () => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('touchstart', handleClickOutside);
     };
-  }, [isOpen, selectedNotice, menuOpen]);
+  }, [isOpen, selectedNotice, menuOpen, itemMenuOpen]);
 
   const handleDropdownClick = (e) => {
     e.stopPropagation();
@@ -62,6 +83,7 @@ const NotificationBell = () => {
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     retry: 1,
+    select: (data) => data?.filter((n) => n.enable),
   });
 
   const { data: unreadNotifications, isLoading: isUnreadLoading } = useQuery({
@@ -71,6 +93,7 @@ const NotificationBell = () => {
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     retry: 1,
+    select: (data) => data?.filter((n) => n.enable),
   });
 
   const { data: unreadCount, isLoading: isCountLoading } = useQuery({
@@ -100,6 +123,41 @@ const NotificationBell = () => {
         return old - 1;
       });
     },
+    onError: () => {
+      message.error('Có lỗi xảy ra khi đánh dấu thông báo');
+    },
+  });
+
+  const deleteNoticeMutation = useMutation({
+    mutationFn: (noticeId) => deleteNotice(noticeId),
+    onSuccess: (data, noticeId) => {
+      queryClient.setQueryData(['notices', userId], (old) => {
+        if (!old) return old;
+        return old.map((n) =>
+          n.notificationId === noticeId ? { ...n, enable: false } : n,
+        );
+      });
+      queryClient.setQueryData(['notices-unread', userId], (old) => {
+        if (!old) return old;
+        return old.map((n) =>
+          n.notificationId === noticeId ? { ...n, enable: false } : n,
+        );
+      });
+      queryClient.setQueryData(['noticeCount', userId], (old) => {
+        if (!old || old <= 0) return 0;
+        const wasUnread =
+          showUnread ||
+          (notifications &&
+            notifications.find(
+              (n) => n.notificationId === noticeId && !n.read && n.enable,
+            ));
+        return wasUnread ? old - 1 : old;
+      });
+      message.success('Đã xóa thông báo');
+    },
+    onError: () => {
+      message.error('Có lỗi xảy ra khi xóa thông báo');
+    },
   });
 
   const readAllMutation = useMutation({
@@ -112,6 +170,9 @@ const NotificationBell = () => {
       queryClient.setQueryData(['notices-unread', userId], []);
       queryClient.setQueryData(['noticeCount', userId], 0);
       message.success('Đã đánh dấu tất cả thông báo là đã đọc');
+    },
+    onError: () => {
+      message.error('Có lỗi xảy ra khi đánh dấu thông báo');
     },
   });
 
@@ -128,8 +189,53 @@ const NotificationBell = () => {
     }, 0);
   };
 
+  const handleItemMenuClick = (notificationId, { key }, e) => {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+
+    setTimeout(() => {
+      if (key === 'markRead') {
+        markReadMutation.mutate(notificationId);
+      } else if (key === 'delete') {
+        deleteNoticeMutation.mutate(notificationId);
+      }
+      setItemMenuOpen((prev) => ({ ...prev, [notificationId]: false }));
+    }, 0);
+  };
+
   const handleBackClick = () => {
     setShowUnread(false);
+  };
+
+  const handleItemMoreClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setItemMenuOpen({});
+    setSelectedNotice(null);
+  };
+
+  const handleNotificationClick = (notification) => {
+    setItemMenuOpen({});
+    setSelectedNotice(notification);
+    if (!notification.read) {
+      markReadMutation.mutate(notification.notificationId);
+    }
+  };
+
+  const areAllNotificationsRead = () => {
+    const currentNotifications = showUnread
+      ? unreadNotifications
+      : notifications;
+    if (!currentNotifications || currentNotifications.length === 0) return true;
+
+    const enabledNotifications = currentNotifications.filter((n) => n.enable);
+    if (enabledNotifications.length === 0) return true;
+
+    if (showUnread) return false;
+
+    return enabledNotifications.every((n) => n.read);
   };
 
   return (
@@ -198,7 +304,7 @@ const NotificationBell = () => {
                       }
                     : {
                         key: 'unread',
-                        label: 'Xem chưa đọc',
+                        label: 'Chưa đọc',
                       },
                   {
                     key: 'markAll',
@@ -211,7 +317,8 @@ const NotificationBell = () => {
                       (showUnread
                         ? unreadNotifications?.length === 0
                         : notifications?.length === 0) ||
-                      readAllMutation.isLoading,
+                      readAllMutation.isLoading ||
+                      areAllNotificationsRead(),
                   },
                 ],
                 onClick: handleMenuClick,
@@ -240,10 +347,11 @@ const NotificationBell = () => {
               </div>
             ) : (showUnread ? unreadNotifications : notifications) &&
               (showUnread
-                ? unreadNotifications.length > 0
-                : notifications.length > 0) ? (
-              (showUnread ? unreadNotifications : notifications).map(
-                (notification) => {
+                ? unreadNotifications.filter((n) => n.enable).length > 0
+                : notifications.filter((n) => n.enable).length > 0) ? (
+              (showUnread ? unreadNotifications : notifications)
+                .filter((notification) => notification.enable)
+                .map((notification) => {
                   const createdDate = new Date(notification.created);
                   const timeString = createdDate.toLocaleString('vi-VN', {
                     hour: '2-digit',
@@ -252,47 +360,100 @@ const NotificationBell = () => {
                     month: '2-digit',
                     year: 'numeric',
                   });
+
                   return (
-                    <>
+                    <React.Fragment key={notification.notificationId}>
                       <div
-                        key={notification.notificationId}
-                        className={`p-3 hover:bg-blue-100 rounded-lg cursor-pointer transition-colors ${
+                        className={`p-3 mb-1 hover:bg-blue-100 rounded-lg cursor-pointer transition-colors relative group ${
                           !notification.read ? 'bg-blue-100' : ''
                         }`}
-                        onClick={() => {
-                          setSelectedNotice(notification);
-                          if (!notification.read) {
-                            markReadMutation.mutate(
-                              notification.notificationId,
-                            );
-                          }
-                        }}
+                        onClick={() => handleNotificationClick(notification)}
                       >
                         <div className="flex items-start gap-3">
-                          <div className="flex-shrink-0 mt-1 bg-blue-50 rounded-full w-10 h-10 flex items-center justify-center">
+                          <div className="relative flex-shrink-0 mt-1 bg-blue-50 rounded-full w-10 h-10 flex items-center justify-center">
+                            {!notification.read && (
+                              <div className="absolute -top-0 right-0.5 w-2.5 h-2.5 bg-blue-600 rounded-full" />
+                            )}
                             <Info size={20} className="text-blue-500" />
                           </div>
-                          <div className="flex-1">
-                            <h4 className="text-sm font-medium text-gray-900">
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-sm break-words font-medium text-gray-900">
                               {notification.title}
                             </h4>
-                            <p className="text-sm text-gray-600 mt-1">
+                            <p className="text-sm overflow-hidden text-ellipsis text-gray-600 mt-1">
                               {notification.content}
                             </p>
                             <p className="text-xs text-gray-500 mt-2">
                               {timeString}
                             </p>
                           </div>
-                          {!notification.read && (
-                            <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 ml-2" />
-                          )}
+
+                          <div className="flex items-center gap-2">
+                            <Dropdown
+                              open={itemMenuOpen[notification.notificationId]}
+                              onOpenChange={(open) =>
+                                setItemMenuOpen((prev) => ({
+                                  ...prev,
+                                  [notification.notificationId]: open,
+                                }))
+                              }
+                              menu={{
+                                items: [
+                                  ...(notification.read
+                                    ? []
+                                    : [
+                                        {
+                                          key: 'markRead',
+                                          label: (
+                                            <div className="flex items-center gap-2">
+                                              <Check size={16} />
+                                              Đánh dấu đã đọc
+                                            </div>
+                                          ),
+                                          disabled: markReadMutation.isLoading,
+                                        },
+                                      ]),
+                                  {
+                                    key: 'delete',
+                                    label: (
+                                      <div className="flex items-center gap-2 text-red-600">
+                                        <Trash2 size={16} />
+                                        Xóa thông báo
+                                      </div>
+                                    ),
+                                    disabled: deleteNoticeMutation.isLoading,
+                                  },
+                                ],
+                                onClick: (menuInfo) =>
+                                  handleItemMenuClick(
+                                    notification.notificationId,
+                                    menuInfo,
+                                    menuInfo.domEvent,
+                                  ),
+                              }}
+                              placement="bottomRight"
+                              trigger={['click']}
+                              getPopupContainer={(triggerNode) =>
+                                triggerNode.parentElement || document.body
+                              }
+                            >
+                              <button
+                                className="opacity-100 p-1 rounded hover:bg-gray-200 text-gray-500 transition-colors"
+                                onClick={(e) => {
+                                  handleItemMoreClick(e);
+                                }}
+                                aria-label="Tùy chọn thông báo"
+                              >
+                                <MoreHorizontal size={16} />
+                              </button>
+                            </Dropdown>
+                          </div>
                         </div>
                       </div>
                       <Divider className="!m-0" />
-                    </>
+                    </React.Fragment>
                   );
-                },
-              )
+                })
             ) : (
               <div className="p-8 mt-20 text-center text-gray-500 flex flex-col items-center justify-center gap-2">
                 <BellOff className="w-8 h-8 text-gray-400" />
