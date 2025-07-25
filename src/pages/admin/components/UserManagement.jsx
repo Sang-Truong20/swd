@@ -34,11 +34,13 @@ const UserManagement = () => {
     loadUsers();
   }, []);
 
-  const filteredUsers = (Array.isArray(users) ? users : []).filter(user =>
-    (user.userName || '').toLowerCase().includes((searchTerm || '').toLowerCase()) ||
-    (user.email || '').toLowerCase().includes((searchTerm || '').toLowerCase()) ||
-    (user.name || '').toLowerCase().includes((searchTerm || '').toLowerCase())
-  );
+  const filteredUsers = (Array.isArray(users) ? users : [])
+    .filter(user => user.role !== 'ADMIN')
+    .filter(user =>
+      (user.userName || '').toLowerCase().includes((searchTerm || '').toLowerCase()) ||
+      (user.email || '').toLowerCase().includes((searchTerm || '').toLowerCase()) ||
+      (user.name || '').toLowerCase().includes((searchTerm || '').toLowerCase())
+    );
 
   const handleEditUser = (user) => {
     setSelectedUser(user);
@@ -181,7 +183,7 @@ const UserManagement = () => {
               <th>Username</th>
               <th>Email</th>
               <th>Tên đầy đủ</th>
-              <th>Role</th>
+              <th>Vai trò</th>
               <th>Trạng thái</th>
               <th>Ngày tạo</th>
               <th>Ngày cập nhật</th>
