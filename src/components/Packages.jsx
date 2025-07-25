@@ -40,7 +40,6 @@ const Packages = () => {
       const packageConfig = {
         0: {
           period: '/ Tháng',
-          description: 'Trải nghiệm cơ bản các tính năng của ứng dụng',
           features: [
             'Sử dụng các tính năng cơ bản',
             'Hỗ trợ khách hàng 24/7',
@@ -53,8 +52,6 @@ const Packages = () => {
         },
         1: {
           period: '/ Tháng',
-          description:
-            'Mở khóa các tính năng nâng cao để có trải nghiệm tuyệt vời',
           features: [
             'Truy cập toàn bộ tính năng ứng dụng',
             'Hỗ trợ khách hàng VIP',
@@ -68,7 +65,6 @@ const Packages = () => {
         },
         2: {
           period: '/ Tháng',
-          description: 'Gói cao cấp với nhiều tính năng độc quyền',
           features: [
             'Truy cập toàn bộ tính năng cao cấp',
             'Hỗ trợ khách hàng Premium 24/7',
@@ -90,7 +86,7 @@ const Packages = () => {
         name: item.name || 'Gói chưa đặt tên',
         price: price === 0 ? '0đ' : `${price.toLocaleString('vi-VN')}đ`,
         period: config.period,
-        description: config.description,
+        description: item.description || 'Không có mô tả',
         features: config.features,
         buttonText: config.buttonText,
         isPopular: config.isPopular,
